@@ -1,0 +1,6 @@
+name = 'Default'
+pages = [
+    'overview.gohtml',
+    'mealplan.gohtml',
+    'calendar.gohtml',
+]
