@@ -1,0 +1,19 @@
+packages:
+  dashboard: !include
+    file: common/dashboard-base.yaml
+    vars:
+      touch_threshold: 1000 # Change this to a higher value if the touch buttons are too sensitive
+      display_rotation: 0° # Change this to 90°, 180° or 270° if your display is rotated
+      base_url: 'http://192.168.178.68:1234' # Change this to the IP of your dashboard server
+      dashboard_name: 'default' # Change this to the name of your dashboard
+
+esphome:
+  name: dashboard
+  friendly_name: Dashboard
+  name_add_mac_suffix: false
+
+wifi:
+  ap:
+    ssid: "Dashboard"
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password

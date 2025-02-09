@@ -1,0 +1,256 @@
+esphome:
+  project:
+    name: topi314.Dashboard
+    version: 2025.1.0
+  name: dashboard
+  friendly_name: Dashboard
+  name_add_mac_suffix: true
+  min_version: 2024.12.2
+  on_boot:
+    priority: 375
+    then:
+      - component.update: eink_display
+      # If after 10 minutes, the device is still initializing, turn off the init_in_progress variable
+      - delay: 10min
+      - if:
+          condition:
+            lambda: return id(init_in_progress);
+          then:
+            - lambda: id(init_in_progress) = false;
+            - component.update: eink_display
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  id: wifi_id
+  on_connect:
+    - component.update: eink_display
+  on_disconnect:
+    - component.update: eink_display
+
+api:
+  on_client_connected:
+    - lambda: id(init_in_progress) = false;
+    - component.update: eink_display
+    - sensor.template.publish:
+        id: current_page_index
+        state: 0
+logger:
+  level: VERBOSE
+  logs:
+    sensor: WARN # avoids logging debug sensor updates
+
+esp32_touch:
+  setup_mode: false
+
+globals:
+  # Global initialization variable. Initialized to true and set to false once everything is connected
+  - id: init_in_progress
+    type: bool
+    restore_value: no
+    initial_value: "true"
+
+binary_sensor:
+  - platform: esp32_touch
+    id: left_button
+    pin: GPIO32
+    threshold: ${touch_threshold}
+    on_multi_click:
+      # Single click
+      - timing:
+          - ON for at most 1s
+        then:
+          - script.execute:
+              id: control
+              action: "prev_page"
+      # Long press
+      - timing:
+          - ON for at least 1s
+        then:
+          - script.execute:
+              id: control
+              action: "first_page"
+  - platform: esp32_touch
+    id: right_button
+    pin: GPIO33
+    threshold: ${touch_threshold}
+    on_multi_click:
+      # Single click
+      - timing:
+          - ON for at most 1s
+        then:
+          - script.execute:
+              id: control
+              action: "next_page"
+      # Long press
+      - timing:
+          - ON for at least 1s
+        then:
+          - script.execute:
+              id: control
+              action: "last_page"
+
+sensor:
+  - platform: template
+    id: current_page_index
+    name: "Page"
+    icon: "mdi:book-open-page-variant"
+    accuracy_decimals: 0
+    on_value:
+      then:
+        - online_image.release: current_page
+        - online_image.set_url:
+            id: current_page
+            url: !lambda |-
+              return ((std::string) "${base_url}/dashboards/${dashboard_name}/pages/" + std::to_string(static_cast<int>(id(current_page_index).state))).c_str();
+        - component.update: current_page
+
+number:
+  - platform: template
+    id: refresh_interval
+    name: "Refresh Interval"
+    icon: "mdi:timer"
+    min_value: 0
+    max_value: 3600
+    step: 1
+    initial_value: 60
+    entity_category: config
+    unit_of_measurement: "s"
+    optimistic: true
+    restore_value: true
+    on_value:
+      then:
+        - script.execute:
+            id: control
+            action: "refresh"
+
+button:
+  - platform: template
+    id: refresh_button
+    name: "Refresh"
+    icon: "mdi:refresh"
+    on_press:
+      - script.execute: refresh
+  - platform: template
+    id: next_page_button
+    name: "Next Page"
+    icon: "mdi:chevron-right"
+    on_press:
+      - script.execute:
+          id: control
+          action: "next_page"
+  - platform: template
+    id: last_page_button
+    name: "Last Page"
+    icon: "mdi:chevron-double-right"
+    on_press:
+      - script.execute:
+          id: control
+          action: "last_page"
+  - platform: template
+    id: prev_page_button
+    name: "Previous Page"
+    icon: "mdi:chevron-left"
+    on_press:
+      - script.execute:
+          id: control
+          action: "prev_page"
+  - platform: template
+    id: first_page_button
+    name: "First Page"
+    icon: "mdi:chevron-double-left"
+    on_press:
+      - script.execute:
+          id: control
+          action: "first_page"
+
+script:
+  - id: control
+    mode: single
+    parameters:
+      action: string
+    then:
+      - http_request.get:
+          url: !lambda |-
+            return ((std::string) "${base_url}/dashboards/${dashboard_name}/control?page=" + std::to_string(static_cast<int>(id(current_page_index).state)) + "&action=" + action).c_str();
+          capture_response: true
+          on_response:
+            then:
+              - sensor.template.publish:
+                  id: current_page_index
+                  state: !lambda |-
+                    return std::stof(body);
+  - id: refresh
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: return id(refresh_interval).state != 0;
+          then:
+            - delay: !lambda |-
+                return id(refresh_interval).state * 1000;
+            - script.execute:
+                id: control
+                action: "next_page"
+
+http_request:
+  timeout: 10s
+  verify_ssl: false
+
+online_image:
+  - url: "${base_url}/dashboards/${dashboard_name}/pages/0"
+    id: current_page
+    format: png
+    on_download_finished:
+      - then:
+          - component.update: eink_display
+          - script.execute: refresh
+    on_error:
+      - then:
+          - logger.log: "Error downloading image"
+
+spi:
+  clk_pin: GPIO13
+  mosi_pin: GPIO14
+
+font:
+  - file: "fonts/Tahoma.ttf"
+    id: font1
+    size: 32
+  - file: "gfonts://Material+Symbols+Outlined"
+    id: icons
+    size: 24
+    glyphs: [
+      "\U0000e63e", # wifi
+      "\U0000eb31", # wifi-find
+    ]
+
+display:
+  - platform: waveshare_epaper
+    id: eink_display
+    cs_pin: GPIO01
+    dc_pin: GPIO27
+    busy_pin:
+      number: GPIO25
+      inverted: true
+    reset_pin: GPIO26
+    model: 7.50inv2
+    update_interval: never
+    rotation: ${display_rotation}
+    reset_duration: 2ms
+    lambda: |-
+      if (id(wifi_id).is_connected()) {
+        it.print(0, 0, id(icons), "\U0000e63e");
+      } else {
+        it.print(0, 0, id(icons), "\U0000eb31");
+      }
+
+      if (id(init_in_progress)) {
+        it.print(400, 200, id(font1), TextAlign::CENTER, "Initializing...");
+        return;
+      }
+
+      it.image(0, 24, id(current_page), COLOR_OFF, COLOR_ON);

@@ -1,4 +1,4 @@
-package main
+package dashboard
 
 import (
 	"context"
@@ -19,16 +19,18 @@ const (
 	ActionFirstPage Action = "first_page"
 )
 
-func (s *server) getControl(w http.ResponseWriter, r *http.Request) {
-	slog.InfoContext(r.Context(), "getControl")
+func (s *Server) getControl(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.PathValue("dashboard")
 
 	query := r.URL.Query()
 	action := Action(query.Get("action"))
 	lastPageStr := query.Get("page")
+
+	slog.InfoContext(r.Context(), "getControl", slog.String("dashboard", dashboard), slog.String("action", string(action)), slog.String("last_page", lastPageStr))
+
 	lastPage, err := strconv.Atoi(lastPageStr)
 	if err != nil {
-		http.Error(w, "invalid page number", http.StatusBadRequest)
+		Error(r.Context(), w, "invalid page number", http.StatusBadRequest)
 		return
 	}
 
@@ -44,13 +46,15 @@ func (s *server) getControl(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *server) getPage(w http.ResponseWriter, r *http.Request) {
-	slog.InfoContext(r.Context(), "getPage")
+func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.PathValue("dashboard")
 	pageIndexStr := r.PathValue("page")
+
+	slog.InfoContext(r.Context(), "getPage", slog.String("dashboard", dashboard), slog.String("page", pageIndexStr))
+
 	pageIndex, err := strconv.Atoi(pageIndexStr)
 	if err != nil {
-		http.Error(w, "invalid page number", http.StatusBadRequest)
+		Error(r.Context(), w, "invalid page number", http.StatusBadRequest)
 		return
 	}
 
@@ -60,12 +64,12 @@ func (s *server) getPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	image, err := s.renderPage(r.Context(), *page, RenderOptions{
-		BinaryPath: "wkhtmltoimage",
-		AssetsPath: "./assets",
-		Width:      800,
-		Height:     480,
-		Quality:    100,
+	pagePNG, pagePNGLen, err := s.renderPage(r.Context(), *page, RenderOptions{
+		BinaryPath: s.cfg.WKHTMLToImagePath,
+		AssetsDir:  page.DashboardConfig.AssetsDir,
+		Width:      page.DashboardConfig.Width,
+		Height:     page.DashboardConfig.Height,
+		Quality:    page.DashboardConfig.Quality,
 	})
 	if err != nil {
 		Error(r.Context(), w, fmt.Sprintf("failed to render page: %s", err), http.StatusInternalServerError)
@@ -73,7 +77,8 @@ func (s *server) getPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "image/png")
-	if _, err = io.Copy(w, image); err != nil {
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", pagePNGLen))
+	if _, err = io.Copy(w, pagePNG); err != nil {
 		Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
 		return
 	}

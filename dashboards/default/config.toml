@@ -1,6 +1,10 @@
 name = 'Default'
+width = 800
+height = 454
+quality = 90
+assetsDir = 'assets'
 pages = [
-    'overview.gohtml',
-    'mealplan.gohtml',
-    'calendar.gohtml',
+    'pages/overview.gohtml',
+    'pages/mealplan.gohtml',
+    'pages/calendar.gohtml',
 ]
