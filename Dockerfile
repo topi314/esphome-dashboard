@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     GOARCH=$TARGETARCH \
     go build -o esphome-dashboard github.com/topi314/esphome-dashboard
 
-FROM alpine
+FROM alpine:3.14
 
 RUN apk add --no-cache  \
     wkhtmltopdf \
