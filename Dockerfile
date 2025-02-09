@@ -15,11 +15,11 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     GOARCH=$TARGETARCH \
     go build -o esphome-dashboard github.com/topi314/esphome-dashboard
 
-FROM alpine:3.14
+FROM chromedp/headless-shell
 
-RUN apk add --no-cache  \
-    wkhtmltopdf \
-    ttf-freefont
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	 fonts-freefont-ttf \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=build /build/esphome-dashboard /bin/esphome-dashboard
 

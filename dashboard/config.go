@@ -33,24 +33,21 @@ func defaultConfig() Config {
 			AddSource: false,
 			NoColor:   false,
 		},
-		ListenAddr:        ":8080",
-		WKHTMLToImagePath: "wkhtmltoimage",
-		DashboardDir:      "dashboards",
+		ListenAddr:   ":8080",
+		DashboardDir: "dashboards",
 	}
 }
 
 type Config struct {
-	Log               LogConfig `toml:"log"`
-	ListenAddr        string    `toml:"listen_addr"`
-	WKHTMLToImagePath string    `toml:"wkhtmltoimage_path"`
-	DashboardDir      string    `toml:"dashboard_dir"`
+	Log          LogConfig `toml:"log"`
+	ListenAddr   string    `toml:"listen_addr"`
+	DashboardDir string    `toml:"dashboard_dir"`
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("Log: %s\n ListenAddr: %s\n WKHTMLToImagePath: %s\n DashboardDir: %s\n",
+	return fmt.Sprintf("Log: %s\n ListenAddr: %s\n DashboardDir: %s\n",
 		c.Log,
 		c.ListenAddr,
-		c.WKHTMLToImagePath,
 		c.DashboardDir,
 	)
 }

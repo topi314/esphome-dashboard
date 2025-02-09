@@ -1,28 +1,20 @@
 package dashboard
 
 import (
-	"bytes"
-	"context"
 	"fmt"
-	"html/template"
-	"image/png"
-	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strconv"
 
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/frontmatter"
 )
 
 type DashboardConfig struct {
-	Name      string   `toml:"name"`
-	Height    int      `toml:"height"`
-	Width     int      `toml:"width"`
-	Quality   int      `toml:"quality"`
-	AssetsDir string   `toml:"assets_dir"`
-	Pages     []string `toml:"pages"`
+	Name   string   `toml:"name"`
+	Height int      `toml:"height"`
+	Width  int      `toml:"width"`
+	Base   string   `toml:"base"`
+	Pages  []string `toml:"pages"`
 }
 
 func (s *Server) getDashboardConfig(dashboard string) (*DashboardConfig, error) {
@@ -74,13 +66,21 @@ func (s *Server) getNextPageIndex(dashboard string, lastPage int, action Action)
 }
 
 type Page struct {
-	Index           int
-	Vars            map[string]any
-	Body            []byte
-	DashboardConfig DashboardConfig
+	Name  string
+	Index int
+	Vars  map[string]any
+	Body  []byte
 }
 
-func (s *Server) loadPage(dashboard string, pageIndex int) (*Page, error) {
+type Base struct {
+	Vars      map[string]any
+	Body      []byte
+	PageIndex int
+	Pages     []Page
+	Config    DashboardConfig
+}
+
+func (s *Server) loadDashboard(dashboard string, pageIndex int) (*Base, error) {
 	config, err := s.getDashboardConfig(dashboard)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get dashboard config: %w", err)
@@ -90,85 +90,53 @@ func (s *Server) loadPage(dashboard string, pageIndex int) (*Page, error) {
 		return nil, fmt.Errorf("invalid page index: %d", pageIndex)
 	}
 
-	pageFile, err := os.Open(filepath.Join(s.cfg.DashboardDir, dashboard, config.Pages[pageIndex]))
+	baseFile, err := os.Open(filepath.Join(s.cfg.DashboardDir, dashboard, config.Base))
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer baseFile.Close()
+
+	var baseFrontmatter map[string]any
+	baseBody, err := frontmatter.Parse(baseFile, &baseFrontmatter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
+	}
+
+	var pages []Page
+	for i, pageName := range config.Pages {
+		page, err := s.loadPage(dashboard, i, pageName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load page: %w", err)
+		}
+		pages = append(pages, *page)
+	}
+
+	return &Base{
+		Vars:      baseFrontmatter,
+		Body:      baseBody,
+		PageIndex: pageIndex,
+		Pages:     pages,
+		Config:    *config,
+	}, nil
+}
+
+func (s *Server) loadPage(dashboard string, i int, page string) (*Page, error) {
+	pageFile, err := os.Open(filepath.Join(s.cfg.DashboardDir, dashboard, page))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer pageFile.Close()
 
-	var pf map[string]any
-	body, err := frontmatter.Parse(pageFile, &pf)
+	var pageFrontmatter map[string]any
+	pageBody, err := frontmatter.Parse(pageFile, &pageFrontmatter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse frontmatter: %w", err)
 	}
 
 	return &Page{
-		Index:           pageIndex,
-		Vars:            pf,
-		Body:            body,
-		DashboardConfig: *config,
+		Name:  page,
+		Index: i,
+		Vars:  pageFrontmatter,
+		Body:  pageBody,
 	}, nil
-}
-
-type RenderOptions struct {
-	BinaryPath string
-	AssetsDir  string
-	Width      int
-	Height     int
-	Quality    int
-}
-
-type RenderData struct {
-	Vars map[string]any
-}
-
-func (s *Server) renderPage(ctx context.Context, page Page, options RenderOptions) (io.Reader, int, error) {
-	t, err := template.New("page").Parse(string(page.Body))
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to parse template: %w", err)
-	}
-
-	var buf bytes.Buffer
-	if err = t.Execute(&buf, RenderData{
-		Vars: page.Vars,
-	}); err != nil {
-		return nil, 0, fmt.Errorf("failed to execute template: %w", err)
-	}
-
-	cmd := exec.CommandContext(ctx, options.BinaryPath,
-		"--width", strconv.Itoa(options.Width),
-		"--height", strconv.Itoa(options.Height),
-		"--quality", strconv.Itoa(options.Quality),
-		"--allow", options.AssetsDir,
-		"--disable-smart-width",
-		"--disable-javascript",
-		"--disable-plugins",
-		"-f", "png",
-		"-", "-",
-	)
-	cmd.Stdin = &buf
-	var imageBuf bytes.Buffer
-	cmd.Stdout = &imageBuf
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err = cmd.Run(); err != nil {
-		return nil, 0, fmt.Errorf("failed to run command: %q: %w", stderr.String(), err)
-	}
-
-	return s.reencodePNG(&imageBuf)
-}
-
-func (s *Server) reencodePNG(r io.Reader) (io.Reader, int, error) {
-	decoded, err := png.Decode(r)
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to decode png: %w", err)
-	}
-
-	encodedBuf := new(bytes.Buffer)
-	if err = s.Encoder.Encode(encodedBuf, decoded); err != nil {
-		return nil, 0, fmt.Errorf("failed to encode png: %w", err)
-	}
-
-	return encodedBuf, encodedBuf.Len(), nil
 }

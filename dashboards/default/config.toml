@@ -1,8 +1,7 @@
 name = 'Default'
 width = 800
 height = 454
-quality = 90
-assetsDir = 'assets'
+base = 'base.gohtml'
 pages = [
     'pages/overview.gohtml',
     'pages/mealplan.gohtml',
