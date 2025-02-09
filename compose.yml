@@ -1,0 +1,10 @@
+services:
+  esphome-dashboard:
+    image: ghcr.io/topi314/esphome-dashboard:master
+    container_name: esphome-dashboard
+    restart: unless-stopped
+    volumes:
+      - ./config.toml:/var/lib/esphome-dashboard/config.toml
+      - ./dashboards/:/var/lib/esphome-dashboard/dashboards/
+    ports:
+      - "8080:8080"
