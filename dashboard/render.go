@@ -29,6 +29,7 @@ type RenderData struct {
 	PageCount     int
 	Pages         []PageRenderData
 	Vars          map[string]any
+	Assets        map[string]string `json:"-"`
 	HomeAssistant HomeAssistantRenderData
 }
 
@@ -42,15 +43,24 @@ type PageRenderData struct {
 }
 
 type HomeAssistantRenderData struct {
-	Entities  map[string]homeassistant.State
+	Entities  map[string]homeassistant.EntityState
 	Calendars map[string][]homeassistant.CalendarEvent
+	Services  map[string]homeassistant.Response
 }
 
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
-		"seq":             seq,
-		"humanizeTime":    humanize.Time,
-		"humanizeRelTime": humanize.RelTime,
+		"seq":                 seq,
+		"convertNewLinesToBR": convertNewLinesToBR,
+		"safeHTML":            safeHTML,
+		"safeCSS":             safeCSS,
+		"safeHTMLAttr":        safeHTMLAttr,
+		"safeURL":             safeURL,
+		"safeJS":              safeJS,
+		"safeJSStr":           safeJSStr,
+		"safeSrcset":          safeSrcset,
+		"humanizeTime":        humanize.Time,
+		"humanizeRelTime":     humanize.RelTime,
 	}
 }
 
@@ -87,23 +97,24 @@ func (s *Server) renderDashboard(ctx context.Context, base Base, options RenderO
 		return nil, 0, fmt.Errorf("failed to parse templates: %w", err)
 	}
 
-	slog.Debug("loaded templates", slog.Any("templates", baseTemplate.DefinedTemplates()))
+	slog.DebugContext(ctx, "loaded templates", slog.String("templates", baseTemplate.DefinedTemplates()))
 
-	for _, entity := range base.Config.HomeAssistant.Entities {
-		state, err := s.homeAssistant.GetState(ctx, entity)
-		if err != nil {
-			return nil, 0, fmt.Errorf("failed to get state: %w", err)
-		}
-		base.Vars[entity] = state
+	homeAssistantRenderData := s.fetchHomeAssistantData(ctx, base.Config.HomeAssistant)
+
+	data := RenderData{
+		PageIndex:     base.PageIndex,
+		PageCount:     len(base.Config.Pages),
+		Pages:         pageRenderData,
+		Vars:          base.Vars,
+		Assets:        base.Assets,
+		HomeAssistant: homeAssistantRenderData,
 	}
 
+	//jsonData, _ := json.MarshalIndent(data, "", "  ")
+	//slog.DebugContext(ctx, "rendering dashboard", slog.String("data", string(jsonData)))
+
 	var buf bytes.Buffer
-	if err = baseTemplate.ExecuteTemplate(&buf, "base", RenderData{
-		PageIndex: base.PageIndex,
-		PageCount: len(base.Config.Pages),
-		Pages:     pageRenderData,
-		Vars:      base.Vars,
-	}); err != nil {
+	if err = baseTemplate.ExecuteTemplate(&buf, "base", data); err != nil {
 		return nil, 0, fmt.Errorf("failed to execute template: %w", err)
 	}
 

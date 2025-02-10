@@ -87,7 +87,7 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if html {
-		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	} else {
 		w.Header().Set("Content-Type", "image/png")
 	}

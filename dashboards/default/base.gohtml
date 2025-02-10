@@ -6,8 +6,41 @@
         height: 100%;
         margin: 0;
         padding: 0;
-        font-family: Arial, sans-serif;
+        font-family: 'Gotham Round', system-ui;
+        font-weight: 100;
     }
+
+    h1 {
+        margin: 0;
+    }
+
+    @font-face {
+        font-family: 'Gotham Round';
+        font-style: normal;
+        src: url("{{ (index .Assets "assets/gothamrnd.otf") | safeURL }}") format("opentype");
+    }
+
+    @font-face {
+        font-family: 'Material Symbols Outlined';
+        font-style: normal;
+        src: url("{{ (index .Assets "assets/materialsymbols.ttf") | safeURL }}") format("truetype");
+    }
+
+    .icon {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+    }
+
+
 
     #root {
         display: flex;
@@ -47,14 +80,14 @@
     }
 </style>
 <div id="root">
-    {{ template "page" .Page }}
-	<div id="footer">
+    {{ template "page" . }}
+    <div id="footer">
         {{ range $i := (seq .PageCount) }}
             {{ if eq $i $.PageIndex }}
-				<span class="dot filled"></span>
+                <span class="dot filled"></span>
             {{ else }}
-				<span class="dot"></span>
+                <span class="dot"></span>
             {{ end }}
         {{ end }}
-	</div>
+    </div>
 </div>

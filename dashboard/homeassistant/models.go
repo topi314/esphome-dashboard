@@ -5,12 +5,16 @@ import (
 	"time"
 )
 
-type State struct {
-	Attributes  map[string]any `json:"attributes"`
+type Status struct {
+	Message string `json:"message"`
+}
+
+type EntityState struct {
 	EntityID    string         `json:"entity_id"`
 	LastChanged time.Time      `json:"last_changed"`
 	LastUpdated time.Time      `json:"last_updated"`
 	State       string         `json:"state"`
+	Attributes  map[string]any `json:"attributes"`
 }
 
 type CalendarEvent struct {
@@ -35,4 +39,9 @@ func (d Date) Time() time.Time {
 		return date
 	}
 	return d.DateTime
+}
+
+type Response struct {
+	ChangedStates   []EntityState  `json:"changed_states"`
+	ServiceResponse map[string]any `json:"service_response"`
 }

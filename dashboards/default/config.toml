@@ -4,6 +4,26 @@ height = 454
 base = 'base.gohtml'
 pages = [
     'pages/overview.gohtml',
+    'pages/weather.gohtml',
     'pages/mealplan.gohtml',
     'pages/calendar.gohtml',
 ]
+assets = [
+    'assets/materialsymbols.ttf',
+    'assets/gothamrnd.otf'
+]
+
+[home_assistant]
+entities = [
+    { name = 'FridgeTempYellow', id = 'sensor.fridge_temperature_yellow' },
+    { name = 'FridgeTempRed', id = 'sensor.fridge_temperature_red' },
+    { name = 'Forecast', id = 'weather.forecast_home' },
+]
+calendars = [
+    { name = 'Lunch', id = 'calendar.mealie_lunch', days = 7 },
+    { name = 'Dinner', id = 'calendar.mealie_dinner', days = 7 },
+]
+services = [
+    { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = false, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
+]
+

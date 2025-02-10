@@ -1,0 +1,11 @@
+<div id="page">
+    <h1>{{ .Page.Vars.title }}</h1>
+    <div class="content">
+        <h1>Weather</h1>
+
+        <div>
+            {{ $forecast := .HomeAssistant.Services.WeatherForecasts }}
+            {{ print $forecast }}
+        </div>
+    </div>
+</div>

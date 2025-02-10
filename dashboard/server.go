@@ -41,9 +41,16 @@ type Server struct {
 }
 
 func (s *Server) Start() {
+	status, err := s.homeAssistant.Test(context.Background())
+	if err != nil {
+		slog.Error("failed to connect to home assistant", slog.Any("err", err))
+	} else {
+		slog.Info("connected to home assistant", slog.String("status", status))
+	}
+
 	chromeCtx, chromeCancel := chromedp.NewContext(context.Background())
 	defer chromeCancel()
-	if err := chromedp.Run(chromeCtx, chromedp.Navigate("about:blank")); err != nil {
+	if err = chromedp.Run(chromeCtx, chromedp.Navigate("about:blank")); err != nil {
 		slog.Error("failed to start chrome", slog.Any("err", err))
 		return
 	}

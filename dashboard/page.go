@@ -1,7 +1,9 @@
 package dashboard
 
 import (
+	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -15,17 +17,33 @@ type DashboardConfig struct {
 	Width         int                          `toml:"width"`
 	Base          string                       `toml:"base"`
 	Pages         []string                     `toml:"pages"`
+	Assets        []string                     `toml:"assets"`
 	HomeAssistant DashboardHomeAssistantConfig `toml:"home_assistant"`
 }
 
 type DashboardHomeAssistantConfig struct {
-	Entities  []string         `toml:"entities"`
+	Entities  []EntityConfig   `toml:"entities"`
 	Calendars []CalendarConfig `toml:"calendars"`
+	Services  []ServiceConfig  `toml:"services"`
+}
+
+type EntityConfig struct {
+	Name string `toml:"name"`
+	ID   string `toml:"id"`
 }
 
 type CalendarConfig struct {
 	Name string `toml:"name"`
+	ID   string `toml:"id"`
 	Days int    `toml:"days"`
+}
+
+type ServiceConfig struct {
+	Name           string         `toml:"name"`
+	Domain         string         `toml:"domain"`
+	Service        string         `toml:"service"`
+	ReturnResponse bool           `toml:"return_response"`
+	Data           map[string]any `toml:"data"`
 }
 
 func (s *Server) getDashboardConfig(dashboard string) (*DashboardConfig, error) {
@@ -89,6 +107,7 @@ type Base struct {
 	PageIndex int
 	Pages     []Page
 	Config    DashboardConfig
+	Assets    map[string]string
 }
 
 func (s *Server) loadDashboard(dashboard string, pageIndex int) (*Base, error) {
@@ -122,12 +141,15 @@ func (s *Server) loadDashboard(dashboard string, pageIndex int) (*Base, error) {
 		pages = append(pages, *page)
 	}
 
+	assets := s.loadAssets(dashboard, config.Assets)
+
 	return &Base{
 		Vars:      baseFrontmatter,
 		Body:      baseBody,
 		PageIndex: pageIndex,
 		Pages:     pages,
 		Config:    *config,
+		Assets:    assets,
 	}, nil
 }
 
@@ -150,4 +172,18 @@ func (s *Server) loadPage(dashboard string, i int, pageName string) (*Page, erro
 		Vars:  pageFrontmatter,
 		Body:  pageBody,
 	}, nil
+}
+
+func (s *Server) loadAssets(dashboard string, assets []string) map[string]string {
+	assetMap := make(map[string]string)
+	for _, asset := range assets {
+		assetFile, err := os.ReadFile(filepath.Join(s.cfg.DashboardDir, dashboard, asset))
+		if err != nil {
+			slog.Error("failed to read asset", slog.String("asset", asset), slog.Any("err", err))
+			continue
+		}
+
+		assetMap[asset] = "data:@application/octet-stream;base64," + base64.StdEncoding.EncodeToString(assetFile)
+	}
+	return assetMap
 }
