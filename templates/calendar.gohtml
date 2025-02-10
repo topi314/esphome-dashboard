@@ -1,0 +1,30 @@
+{{ define "calendar" }}
+	<style>
+        .calendar {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-table {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+        }
+
+        .calendar-table div {
+            border-bottom: 1px solid black;
+	        padding: 1rem;
+        }
+	</style>
+	<div class="calendar">
+		<div class="calendar-table">
+			<div>Monday</div>
+			<div>Tuesday</div>
+			<div>Wednesday</div>
+			<div>Thursday</div>
+			<div>Friday</div>
+			<div>Saturday</div>
+			<div>Sunday</div>
+		</div>
+	</div>
+{{ end }}

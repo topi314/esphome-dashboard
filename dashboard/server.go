@@ -4,19 +4,24 @@ import (
 	"context"
 	"errors"
 	"image/png"
+	"io/fs"
 	"log/slog"
 	"net"
 	"net/http"
 
 	"github.com/chromedp/chromedp"
+
+	"github.com/topi314/esphome-dashboard/dashboard/homeassistant"
 )
 
-func New(cfg Config) *Server {
+func New(cfg Config, templates fs.FS) *Server {
 	s := &Server{
-		cfg: cfg,
-		Encoder: &png.Encoder{
+		cfg:       cfg,
+		templates: templates,
+		encoder: &png.Encoder{
 			CompressionLevel: png.BestCompression,
 		},
+		homeAssistant: homeassistant.New(cfg.HomeAssistant.URL(), cfg.HomeAssistant.Token),
 	}
 
 	s.server = &http.Server{
@@ -28,10 +33,11 @@ func New(cfg Config) *Server {
 }
 
 type Server struct {
-	cfg       Config
-	server    *http.Server
-	Encoder   *png.Encoder
-	chromeCtx context.Context
+	cfg           Config
+	templates     fs.FS
+	server        *http.Server
+	encoder       *png.Encoder
+	homeAssistant *homeassistant.Client
 }
 
 func (s *Server) Start() {
@@ -45,8 +51,6 @@ func (s *Server) Start() {
 	s.server.BaseContext = func(listener net.Listener) context.Context {
 		return chromeCtx
 	}
-
-	s.chromeCtx = chromeCtx
 
 	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("server error", slog.Any("err", err))

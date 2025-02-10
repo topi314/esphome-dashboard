@@ -2,19 +2,32 @@
 
 ---
 <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
     #root {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
         height: 100%;
+        width: 100%;
     }
 
-    .content {
+    #page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         flex-grow: 1;
     }
 
-    .footer {
+    .content {
+        justify-self: stretch;
+    }
+
+    #footer {
         display: flex;
         justify-content: center;
         margin-top: 20px;
@@ -35,7 +48,7 @@
 </style>
 <div id="root">
     {{ template "page" .Page }}
-	<div class="footer">
+	<div id="footer">
         {{ range $i := (seq .PageCount) }}
             {{ if eq $i $.PageIndex }}
 				<span class="dot filled"></span>

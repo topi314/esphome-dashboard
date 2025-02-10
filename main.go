@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"flag"
+	"io/fs"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -14,6 +16,9 @@ import (
 
 	"github.com/topi314/esphome-dashboard/dashboard"
 )
+
+//go:embed templates/*.gohtml
+var templates embed.FS
 
 func main() {
 	cfgPath := flag.String("config", "config.toml", "path to config file")
@@ -35,7 +40,14 @@ func main() {
 	slog.Info("Starting dashboard...", slog.String("version", version), slog.String("go_version", runtime.Version()))
 	slog.Info("Config loaded", slog.Any("config", cfg))
 
-	s := dashboard.New(cfg)
+	var t fs.FS
+	if cfg.Debug {
+		t = os.DirFS(".")
+	} else {
+		t = templates
+	}
+
+	s := dashboard.New(cfg, t)
 	go s.Start()
 
 	slog.Info("Dashboard started", slog.Any("addr", cfg.ListenAddr))

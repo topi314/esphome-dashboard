@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -39,16 +40,20 @@ func defaultConfig() Config {
 }
 
 type Config struct {
-	Log          LogConfig `toml:"log"`
-	ListenAddr   string    `toml:"listen_addr"`
-	DashboardDir string    `toml:"dashboard_dir"`
+	Log           LogConfig           `toml:"log"`
+	Debug         bool                `toml:"debug"`
+	ListenAddr    string              `toml:"listen_addr"`
+	DashboardDir  string              `toml:"dashboard_dir"`
+	HomeAssistant HomeAssistantConfig `toml:"home_assistant"`
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("Log: %s\n ListenAddr: %s\n DashboardDir: %s\n",
+	return fmt.Sprintf("Log: %s\n Debug: %t\n ListenAddr: %s\n DashboardDir: %s\n HomeAssistant: %s",
 		c.Log,
+		c.Debug,
 		c.ListenAddr,
 		c.DashboardDir,
+		c.HomeAssistant,
 	)
 }
 
@@ -73,5 +78,30 @@ func (c LogConfig) String() string {
 		c.Format,
 		c.AddSource,
 		c.NoColor,
+	)
+}
+
+type HomeAssistantConfig struct {
+	Host   string `toml:"host"`
+	Port   int    `toml:"port"`
+	Secure bool   `toml:"secure"`
+	Token  string `toml:"token"`
+}
+
+func (c HomeAssistantConfig) URL() string {
+	scheme := "http"
+	if c.Secure {
+		scheme = "https"
+	}
+
+	return fmt.Sprintf("%s://%s:%d", scheme, c.Host, c.Port)
+}
+
+func (c HomeAssistantConfig) String() string {
+	return fmt.Sprintf("\n  Host: %s\n  Port: %d\n  Secure: %t\n  Token: %s",
+		c.Host,
+		c.Port,
+		c.Secure,
+		strings.Repeat("*", len(c.Token)),
 	)
 }

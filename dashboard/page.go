@@ -10,11 +10,22 @@ import (
 )
 
 type DashboardConfig struct {
-	Name   string   `toml:"name"`
-	Height int      `toml:"height"`
-	Width  int      `toml:"width"`
-	Base   string   `toml:"base"`
-	Pages  []string `toml:"pages"`
+	Name          string                       `toml:"name"`
+	Height        int                          `toml:"height"`
+	Width         int                          `toml:"width"`
+	Base          string                       `toml:"base"`
+	Pages         []string                     `toml:"pages"`
+	HomeAssistant DashboardHomeAssistantConfig `toml:"home_assistant"`
+}
+
+type DashboardHomeAssistantConfig struct {
+	Entities  []string         `toml:"entities"`
+	Calendars []CalendarConfig `toml:"calendars"`
+}
+
+type CalendarConfig struct {
+	Name string `toml:"name"`
+	Days int    `toml:"days"`
 }
 
 func (s *Server) getDashboardConfig(dashboard string) (*DashboardConfig, error) {
@@ -120,8 +131,8 @@ func (s *Server) loadDashboard(dashboard string, pageIndex int) (*Base, error) {
 	}, nil
 }
 
-func (s *Server) loadPage(dashboard string, i int, page string) (*Page, error) {
-	pageFile, err := os.Open(filepath.Join(s.cfg.DashboardDir, dashboard, page))
+func (s *Server) loadPage(dashboard string, i int, pageName string) (*Page, error) {
+	pageFile, err := os.Open(filepath.Join(s.cfg.DashboardDir, dashboard, pageName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
@@ -134,7 +145,7 @@ func (s *Server) loadPage(dashboard string, i int, page string) (*Page, error) {
 	}
 
 	return &Page{
-		Name:  page,
+		Name:  pageName,
 		Index: i,
 		Vars:  pageFrontmatter,
 		Body:  pageBody,

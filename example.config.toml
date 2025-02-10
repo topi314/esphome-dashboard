@@ -1,3 +1,4 @@
+debug = false
 listen_addr = "0.0.0.0:1234"
 dashboard_dir = "dashboards"
 
@@ -6,3 +7,9 @@ level = "debug"
 format = "text"
 add_source = true
 no_color = false
+
+[home_assistant]
+host = "localhost"
+port = 80
+secure = false
+token = ""

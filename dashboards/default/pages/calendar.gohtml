@@ -1,10 +1,9 @@
 ---
 title: Calendar
-text: Welcome to the calendar dashboard.
 ---
-<div>
+<div id="page">
 	<h1>{{ .Vars.title }}</h1>
 	<div class="content">
-		<p>{{ .Vars.text }}</p>
+		{{ template "calendar" .Vars }}
 	</div>
 </div>
