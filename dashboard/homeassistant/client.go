@@ -1,10 +1,12 @@
 package homeassistant
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -27,8 +29,28 @@ type Client struct {
 }
 
 func (c *Client) Do(rq *http.Request) (*http.Response, error) {
+	var body []byte
+	if rq.Body != nil {
+		buf := new(bytes.Buffer)
+		r := io.TeeReader(rq.Body, buf)
+		body, _ = io.ReadAll(r)
+		rq.Body = io.NopCloser(buf)
+	}
+	slog.DebugContext(rq.Context(), "Sending request to Home Assistant", slog.String("method", rq.Method), slog.String("url", rq.URL.String()), slog.String("body", string(body)))
 	rq.Header.Set("Authorization", "Bearer "+c.token)
-	return c.client.Do(rq)
+	rs, err := c.client.Do(rq)
+	if err != nil {
+		return rs, err
+	}
+
+	defer rs.Body.Close()
+
+	buf := new(bytes.Buffer)
+	r := io.TeeReader(rs.Body, buf)
+	body, _ = io.ReadAll(r)
+	rs.Body = io.NopCloser(buf)
+	slog.DebugContext(rq.Context(), "Received response from Home Assistant", slog.String("status", rs.Status), slog.String("body", string(body)))
+	return rs, nil
 }
 
 func (c *Client) Test(ctx context.Context) (string, error) {

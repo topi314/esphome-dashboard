@@ -24,6 +24,6 @@ calendars = [
     { name = 'Dinner', id = 'calendar.mealie_dinner', days = 7 },
 ]
 services = [
-    { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = false, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
+    { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
 ]
 

@@ -50,7 +50,7 @@ func (s *Server) fetchHomeAssistantData(ctx context.Context, config DashboardHom
 			slog.ErrorContext(ctx, "failed to call service", slog.String("domain", service.Domain), slog.String("service", service.Service), slog.Any("err", err))
 			continue
 		}
-		homeAssistantRenderData.Services[service.Domain+"."+service.Service] = response
+		homeAssistantRenderData.Services[service.Name] = response
 	}
 
 	return homeAssistantRenderData

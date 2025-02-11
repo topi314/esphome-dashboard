@@ -2,6 +2,10 @@
 
 ---
 <style>
+    * {
+        box-sizing: border-box;
+    }
+
     html, body {
         height: 100%;
         margin: 0;
@@ -12,6 +16,7 @@
 
     h1 {
         margin: 0;
+        font-size: 60px;
     }
 
     @font-face {
@@ -19,28 +24,6 @@
         font-style: normal;
         src: url("{{ (index .Assets "assets/gothamrnd.otf") | safeURL }}") format("opentype");
     }
-
-    @font-face {
-        font-family: 'Material Symbols Outlined';
-        font-style: normal;
-        src: url("{{ (index .Assets "assets/materialsymbols.ttf") | safeURL }}") format("truetype");
-    }
-
-    .icon {
-        font-family: 'Material Symbols Outlined';
-        font-weight: normal;
-        font-style: normal;
-        font-size: 24px;
-        display: inline-block;
-        line-height: 1;
-        text-transform: none;
-        letter-spacing: normal;
-        word-wrap: normal;
-        white-space: nowrap;
-        direction: ltr;
-    }
-
-
 
     #root {
         display: flex;
@@ -70,7 +53,7 @@
         height: 25px;
         width: 25px;
         border-radius: 50%;
-        border: 1px solid black;
+        border: 2px solid black;
         display: inline-block;
         margin-right: 10px;
     }

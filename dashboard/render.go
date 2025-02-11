@@ -13,7 +13,6 @@ import (
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
-	"github.com/dustin/go-humanize"
 
 	"github.com/topi314/esphome-dashboard/dashboard/homeassistant"
 )
@@ -51,6 +50,7 @@ type HomeAssistantRenderData struct {
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"seq":                 seq,
+		"parseTime":           parseTime,
 		"convertNewLinesToBR": convertNewLinesToBR,
 		"safeHTML":            safeHTML,
 		"safeCSS":             safeCSS,
@@ -59,8 +59,7 @@ func (s *Server) templateFuncs() template.FuncMap {
 		"safeJS":              safeJS,
 		"safeJSStr":           safeJSStr,
 		"safeSrcset":          safeSrcset,
-		"humanizeTime":        humanize.Time,
-		"humanizeRelTime":     humanize.RelTime,
+		"formatTimeToDay":     formatTimeToDay,
 	}
 }
 
@@ -110,8 +109,8 @@ func (s *Server) renderDashboard(ctx context.Context, base Base, options RenderO
 		HomeAssistant: homeAssistantRenderData,
 	}
 
-	//jsonData, _ := json.MarshalIndent(data, "", "  ")
-	//slog.DebugContext(ctx, "rendering dashboard", slog.String("data", string(jsonData)))
+	// jsonData, _ := json.MarshalIndent(data, "", "  ")
+	// slog.DebugContext(ctx, "rendering dashboard", slog.String("data", string(jsonData)))
 
 	var buf bytes.Buffer
 	if err = baseTemplate.ExecuteTemplate(&buf, "base", data); err != nil {

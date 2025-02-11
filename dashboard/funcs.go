@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
+	"time"
 )
 
 func seq(n int) []int {
@@ -12,6 +13,14 @@ func seq(n int) []int {
 		s[i] = i
 	}
 	return s
+}
+
+func parseTime(s string) (time.Time, error) {
+	return time.Parse(time.RFC3339, s)
+}
+
+func formatTimeToDay(t time.Time) string {
+	return t.Format("Mon _2 ")
 }
 
 func convertNewLinesToBR(a any) string {

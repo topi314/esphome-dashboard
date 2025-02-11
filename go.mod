@@ -8,7 +8,6 @@ require (
 	github.com/charmbracelet/log v0.4.0
 	github.com/chromedp/cdproto v0.0.0-20250208210249-fa305b1d5b8a
 	github.com/chromedp/chromedp v0.12.1
-	github.com/dustin/go-humanize v1.0.1
 	github.com/muesli/termenv v0.15.2
 )
 
