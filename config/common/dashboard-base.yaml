@@ -117,7 +117,7 @@ number:
     min_value: 0
     max_value: 3600
     step: 1
-    initial_value: 60
+    initial_value: 280
     entity_category: config
     unit_of_measurement: "s"
     optimistic: true
@@ -180,6 +180,7 @@ script:
     parameters:
       action: string
     then:
+      - script.stop: refresh
       - http_request.get:
           url: !lambda |-
             return ((std::string) "${base_url}/dashboards/${dashboard_name}/control?page=" + std::to_string(static_cast<int>(id(current_page_index).state)) + "&action=" + action).c_str();
@@ -190,6 +191,9 @@ script:
                   id: current_page_index
                   state: !lambda |-
                     return std::stof(body);
+          on_error:
+            then:
+              - script.execute: refresh
   - id: refresh
     mode: restart
     then:
@@ -218,6 +222,7 @@ online_image:
     on_error:
       - then:
           - logger.log: "Error downloading image"
+          - script.execute: refresh
 
 spi:
   clk_pin: GPIO13
