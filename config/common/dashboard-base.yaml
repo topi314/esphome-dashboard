@@ -134,7 +134,9 @@ button:
     name: "Refresh"
     icon: "mdi:refresh"
     on_press:
-      - script.execute: refresh
+      - script.execute:
+          id: control
+          action: "refresh"
   - platform: template
     id: next_page_button
     name: "Next Page"
