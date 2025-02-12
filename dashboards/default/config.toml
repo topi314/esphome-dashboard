@@ -1,6 +1,6 @@
 name = 'Default'
 width = 800
-height = 454
+height = 480
 base = 'base.gohtml'
 pages = [
     'pages/forecast.gohtml',
