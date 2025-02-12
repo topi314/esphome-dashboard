@@ -38,6 +38,7 @@ api:
     - sensor.template.publish:
         id: current_page_index
         state: 0
+
 logger:
   level: VERBOSE
   logs:
@@ -108,6 +109,15 @@ sensor:
               return ((std::string) "${base_url}/dashboards/${dashboard_name}/pages/" + std::to_string(static_cast<int>(id(current_page_index).state))).c_str();
         - component.update: current_page
 
+switch:
+  - platform: template
+    id: dark_mode
+    name: "Dark Mode"
+    icon: "mdi:theme-light-dark"
+    restore_mode: RESTORE_DEFAULT_ON
+    optimistic: true
+    entity_category: config
+
 number:
   - platform: template
     id: refresh_interval
@@ -166,6 +176,10 @@ button:
       - script.execute:
           id: control
           action: "first_page"
+  - platform: restart
+    id: restart_button
+    name: "Restart"
+    entity_category: config
 
 script:
   - id: control
@@ -242,15 +256,22 @@ display:
     rotation: ${display_rotation}
     reset_duration: 2ms
     lambda: |-
+      auto color_on = COLOR_ON;
+      auto color_off = COLOR_OFF;
+      if (id(dark_mode).state) {
+        color_on = COLOR_OFF;
+        color_off = COLOR_ON;
+        it.fill(COLOR_OFF);
+      }
+
       if (id(wifi_id).is_connected()) {
-        it.print(0, 0, id(icons), "\U0000e63e");
+        it.print(0, 0, id(icons), color_on, "\U0000e63e");
       } else {
-        it.print(0, 0, id(icons), "\U0000eb31");
+        it.print(0, 0, id(icons), color_on, "\U0000eb31");
       }
 
       if (id(init_in_progress)) {
-        it.print(400, 200, id(font1), TextAlign::CENTER, "Initializing...");
+        it.print(400, 200, id(font1), color_on, TextAlign::CENTER, "Initializing...");
         return;
       }
-
-      it.image(0, 24, id(current_page), COLOR_OFF, COLOR_ON);
+      it.image(0, 24, id(current_page), color_on, color_off);
