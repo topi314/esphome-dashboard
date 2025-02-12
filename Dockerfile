@@ -18,7 +18,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM chromedp/headless-shell
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-	 fonts-freefont-ttf \
+    ca-certificates \
+	fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=build /build/esphome-dashboard /bin/esphome-dashboard
