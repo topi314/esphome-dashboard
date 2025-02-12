@@ -3,7 +3,6 @@ width = 800
 height = 454
 base = 'base.gohtml'
 pages = [
-    'pages/overview.gohtml',
     'pages/forecast.gohtml',
     'pages/mealplan.gohtml',
     'pages/calendar.gohtml',
@@ -14,8 +13,6 @@ assets = [
 
 [home_assistant]
 entities = [
-    { name = 'FridgeTempYellow', id = 'sensor.fridge_temperature_yellow' },
-    { name = 'FridgeTempRed', id = 'sensor.fridge_temperature_red' },
     { name = 'Forecast', id = 'weather.forecast_home' },
 ]
 calendars = [

@@ -66,36 +66,34 @@ func (s *Server) fetchHomeAssistantData(ctx context.Context, config DashboardHom
 }
 
 func toCalendarDays(events []homeassistant.CalendarEvent, start time.Time) []CalendarDay {
+	nowYear, nowMonth, nowDay := time.Now().Date()
+	now := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, time.Local)
+
 	var days []CalendarDay
 	for _, event := range events {
 		year, month, day := event.Start.Time().Date()
+		d := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
 
-		i := slices.IndexFunc(days, func(cDay CalendarDay) bool {
-			dayYear, dayMonth, dayDay := cDay.Time.Date()
-			return year == dayYear && month == dayMonth && day == dayDay
-		})
-
-		if i == -1 {
+		if i := slices.IndexFunc(days, func(cDay CalendarDay) bool {
+			return d.Equal(cDay.Time)
+		}); i == -1 {
 			days = append(days, CalendarDay{
-				Time:   time.Date(year, month, day, 0, 0, 0, 0, time.Local),
+				Time:   d,
+				Past:   d.Before(now),
 				Events: []homeassistant.CalendarEvent{event},
 			})
-			continue
+		} else {
+			days[i].Events = append(days[i].Events, event)
 		}
-
-		days[i].Events = append(days[i].Events, event)
 	}
 
-	year, month, day := time.Now().Date()
-	now := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
 	end := start.AddDate(0, 0, 28) // add 4 weeks
 
-	// fill in missing days with no events
+	// fill in missing days with no events or sort events by start time
 	for d := start; d.Before(end); d = d.AddDate(0, 0, 1) {
-		i := slices.IndexFunc(days, func(cDay CalendarDay) bool {
+		if i := slices.IndexFunc(days, func(cDay CalendarDay) bool {
 			return d.Equal(cDay.Time)
-		})
-		if i == -1 {
+		}); i == -1 {
 			days = append(days, CalendarDay{
 				Time:   d,
 				Past:   d.Before(now),

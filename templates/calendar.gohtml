@@ -9,12 +9,22 @@
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
             grid-template-rows: auto repeat(4, 1fr);
+            border: 2px black solid;
+            border-radius: 24px;
+            overflow: hidden;
         }
 
         .calendar-table-header {
             padding: 0;
             text-align: center;
-            border-bottom: 1px solid black;
+            border-right: 2px black solid;
+            border-bottom: 2px black dashed;
+            background-color: black;
+            color: white;
+        }
+
+        .calendar-table-header:nth-child(7n) {
+            border-right: none;
         }
 
         .calendar-table-cell {
@@ -22,8 +32,17 @@
             flex-direction: column;
             align-items: stretch;
 
-            border: 1px solid black;
+            border-bottom: 2px black solid;
+            border-right: 2px black solid;
             font-size: 12px;
+        }
+
+        .calendar-table-cell:nth-child(7n) {
+            border-right: none;
+        }
+
+        .calendar-table-cell:nth-last-child(-n+7) {
+            border-bottom: none;
         }
 
         .calendar-table-cell-day {
@@ -37,6 +56,11 @@
             flex-direction: column;
             align-items: stretch;
             white-space: nowrap;
+            padding: 2px;
+            flex-grow: 1;
+        }
+
+        .calendar-table-cell-events span {
             overflow: hidden;
         }
     </style>

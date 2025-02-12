@@ -54,14 +54,11 @@ type CalendarDay struct {
 	Events []homeassistant.CalendarEvent
 }
 
-func (d CalendarDay) Today() bool {
-	year, month, day := time.Now().Date()
-	return d.Time.Year() == year && d.Time.Month() == month && d.Time.Day() == day
-}
-
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"seq":                 seq,
+		"now":                 time.Now,
+		"dict":                dict,
 		"reverse":             reverse,
 		"parseTime":           parseTime,
 		"convertNewLinesToBR": convertNewLinesToBR,

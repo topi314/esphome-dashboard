@@ -1,0 +1,14 @@
+{{ define "gen-time" }}
+    <style>
+        .gen-time {
+            position: fixed;
+            float: right;
+            bottom: 0;
+
+            font-size: 10px;
+        }
+    </style>
+    <div class="gen-time">
+        Generated at: {{ now.Format "Mon Jan _2 15:04:05" }}
+    </div>
+{{ end }}

@@ -110,3 +110,18 @@ func indirect(v reflect.Value) (rv reflect.Value, isNil bool) {
 	}
 	return v, false
 }
+
+func dict(a ...any) (map[string]any, error) {
+	if len(a)%2 != 0 {
+		return nil, errors.New("invalid number of arguments, must be even")
+	}
+	m := make(map[string]any, len(a)/2)
+	for i := 0; i < len(a); i += 2 {
+		key, ok := a[i].(string)
+		if !ok {
+			return nil, errors.New("map keys must be strings")
+		}
+		m[key] = a[i+1]
+	}
+	return m, nil
+}

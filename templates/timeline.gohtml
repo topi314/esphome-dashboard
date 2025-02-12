@@ -34,14 +34,12 @@
     <div class="timeline">
         {{ range $index, $day := . }}
             {{ if eq $index 6 }}
-                {{ break }}
+            {{ break }}
             {{ end }}
-            {{ if eq (len $day.Events) 0}}
+            {{ if or (eq (len $day.Events) 0) $day.Past }}
                 {{ continue }}
             {{ end }}
-            <span class="timeline-day-date">
-                    {{ $day.Time | formatTimeToRelDay }}
-                </span>
+            <span class="timeline-day-date">{{ $day.Time | formatTimeToRelDay }}</span>
             <div class="timeline-day-events">
                 {{ range $index, $event := $day.Events }}
                     <div class="timeline-day-events-event">

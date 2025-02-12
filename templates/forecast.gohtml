@@ -3,9 +3,10 @@
         .forecast {
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
 
-        .forecast-today {
+        .forecast-now {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -13,14 +14,24 @@
             height: 120px;
             font-size: 120px;
             line-height: 120px;
+            width: 100%;
         }
 
-        .forecast-today svg {
+        .forecast-now svg {
             height: 100%;
         }
 
-        .forecast-today-small {
-            font-size: 40px;
+        .forecast-now-details {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 20px;
+        }
+
+        .forecast-now-details svg {
+            height: 20px;
         }
 
         .forecast hr {
@@ -33,8 +44,7 @@
 
         .forecast-days {
             display: flex;
-            justify-content: space-between;
-            gap: 60px;
+            justify-content: space-around;
         }
 
         .forecast-day {
@@ -42,7 +52,7 @@
             flex-direction: column;
             align-items: center;
             font-size: 20px;
-            gap: 10px;
+            font-weight: bold;
         }
 
         .forecast-day svg {
@@ -50,31 +60,49 @@
         }
 
         .forecast-day-temp-low {
-            font-size: 16px;
+            font-size: 12px;
         }
     </style>
     <div class="forecast">
-        {{ if eq (len .forecast) 0}}
-            No weather forecast available.
-        {{ else }}
-            <div class="forecast-today">
-                {{ $day := index .forecast 0 }}
-                {{ template "weatherIcon" $day.condition }}
-                <span>{{ $day.temperature }}°C</span>
-                <span class="forecast-today-small">{{ $day.templow }}°C</span>
+        {{ $now := .Now }}
+        {{ $forecast := .Forecast.forecast }}
+        <div class="forecast-now">
+            {{ template "weatherIcon" $now.State }}
+            <span>{{ $now.Attributes.temperature }}{{ $now.Attributes.temperature_unit }}</span>
+            <div class="forecast-now-details">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>water-percent</title>
+                    <path d="M12,3.25C12,3.25 6,10 6,14C6,17.32 8.69,20 12,20A6,6 0 0,0 18,14C18,10 12,3.25 12,3.25M14.47,9.97L15.53,11.03L9.53,17.03L8.47,15.97M9.75,10A1.25,1.25 0 0,1 11,11.25A1.25,1.25 0 0,1 9.75,12.5A1.25,1.25 0 0,1 8.5,11.25A1.25,1.25 0 0,1 9.75,10M14.25,14.5A1.25,1.25 0 0,1 15.5,15.75A1.25,1.25 0 0,1 14.25,17A1.25,1.25 0 0,1 13,15.75A1.25,1.25 0 0,1 14.25,14.5Z"/>
+                </svg>
+                <span>
+                    {{ $now.Attributes.humidity }}%
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>weather-windy</title>
+                    <path d="M4,10A1,1 0 0,1 3,9A1,1 0 0,1 4,8H12A2,2 0 0,0 14,6A2,2 0 0,0 12,4C11.45,4 10.95,4.22 10.59,4.59C10.2,5 9.56,5 9.17,4.59C8.78,4.2 8.78,3.56 9.17,3.17C9.9,2.45 10.9,2 12,2A4,4 0 0,1 16,6A4,4 0 0,1 12,10H4M19,12A1,1 0 0,0 20,11A1,1 0 0,0 19,10C18.72,10 18.47,10.11 18.29,10.29C17.9,10.68 17.27,10.68 16.88,10.29C16.5,9.9 16.5,9.27 16.88,8.88C17.42,8.34 18.17,8 19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14H5A1,1 0 0,1 4,13A1,1 0 0,1 5,12H19M18,18H4A1,1 0 0,1 3,17A1,1 0 0,1 4,16H18A3,3 0 0,1 21,19A3,3 0 0,1 18,22C17.17,22 16.42,21.66 15.88,21.12C15.5,20.73 15.5,20.1 15.88,19.71C16.27,19.32 16.9,19.32 17.29,19.71C17.47,19.89 17.72,20 18,20A1,1 0 0,0 19,19A1,1 0 0,0 18,18Z"/>
+                </svg>
+                <span>
+                    {{ $now.Attributes.wind_speed }}{{ $now.Attributes.wind_speed_unit }}
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>gauge</title>
+                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z"/>
+                </svg>
+                <span>
+                    {{ $now.Attributes.pressure }}{{ $now.Attributes.pressure_unit }}
+                </span>
             </div>
-            <hr/>
-            <div class="forecast-days">
-                {{ range $index, $day := slice .forecast 1 }}
-                    <div class="forecast-day">
-                        {{ $day.datetime | parseTime | formatTimeToDay }}
-                        {{ template "weatherIcon" $day.condition }}
-                        <span>{{ $day.temperature }}°C</span>
-                        <span class="forecast-day-temp-low">{{ $day.templow }}°C</span>
-                    </div>
-                {{ end }}
-            </div>
-        {{ end }}
+        </div>
+        <hr/>
+        <div class="forecast-days">
+            {{ range $index, $day := $forecast }}
+                <div class="forecast-day">
+                    {{ $day.datetime | parseTime | formatTimeToDay }}
+                    {{ template "weatherIcon" $day.condition }}
+                    {{ $day.temperature }}{{ $now.Attributes.temperature_unit }}
+                    <span class="forecast-day-temp-low">{{ $day.templow }}{{ $now.Attributes.temperature_unit }}</span>
+                </div>
+            {{ else }}
+                <span>No weather forecast available.</span>
+            {{ end }}
+        </div>
     </div>
 {{ end }}
 
