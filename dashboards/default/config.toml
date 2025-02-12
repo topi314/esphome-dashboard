@@ -24,4 +24,3 @@ calendars = [
 services = [
     { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
 ]
-

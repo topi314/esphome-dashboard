@@ -48,7 +48,10 @@ func (s *Server) Start() {
 		slog.Info("connected to home assistant", slog.String("status", status))
 	}
 
-	chromeCtx, chromeCancel := chromedp.NewContext(context.Background())
+	allocCtx, allocCancel := chromedp.NewExecAllocator(context.Background(), append(chromedp.DefaultExecAllocatorOptions[:], chromedp.NoSandbox)...)
+	defer allocCancel()
+
+	chromeCtx, chromeCancel := chromedp.NewContext(allocCtx)
 	defer chromeCancel()
 	if err = chromedp.Run(chromeCtx, chromedp.Navigate("about:blank")); err != nil {
 		slog.Error("failed to start chrome", slog.Any("err", err))
