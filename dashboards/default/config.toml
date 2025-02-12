@@ -17,6 +17,7 @@ entities = [
 ]
 calendars = [
     { name = 'Mealie', ids = ['calendar.mealie_dinner', 'calendar.mealie_lunch'], days = 7 },
+    { name = 'All', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28 },
 ]
 services = [
     { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
