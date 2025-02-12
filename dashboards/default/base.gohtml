@@ -2,75 +2,51 @@
 
 ---
 <style>
-    * {
-        box-sizing: border-box;
-    }
-
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        font-family: 'Gotham Round', system-ui;
-        font-weight: 100;
-    }
-
-    h1 {
-        margin: 0;
-        font-size: 60px;
-    }
-
     @font-face {
         font-family: 'Gotham Round';
         font-style: normal;
         src: url("{{ (index .Assets "assets/gothamrnd.otf") | safeURL }}") format("opentype");
     }
 
-    #root {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
+    * {
+        box-sizing: border-box;
     }
 
-    #page {
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Gotham Round', system-ui;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 60px;
+        text-transform: uppercase;
+    }
+
+    .page {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
-        flex-grow: 1;
+        overflow: hidden;
     }
 
-    .content {
-        justify-self: stretch;
-    }
-
-    #footer {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    .dot {
-        height: 25px;
-        width: 25px;
-        border-radius: 50%;
-        border: 2px solid black;
-        display: inline-block;
-        margin-right: 10px;
-    }
-
-    .filled {
-        background-color: black;
+    .container {
+        height: 100%;
+        width: 90%;
     }
 </style>
-<div id="root">
+<body id="root">
+<div class="page">
     {{ template "page" . }}
-    <div id="footer">
-        {{ range $i := (seq .PageCount) }}
-            {{ if eq $i $.PageIndex }}
-                <span class="dot filled"></span>
-            {{ else }}
-                <span class="dot"></span>
-            {{ end }}
-        {{ end }}
-    </div>
 </div>
+{{ template "pages" . }}
+</body>

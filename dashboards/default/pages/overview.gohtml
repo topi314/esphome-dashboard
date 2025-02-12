@@ -1,20 +1,12 @@
----
-title: Overview
-text: Welcome to the overview dashboard.
----
-<div id="page">
-    <h1>{{ .Page.Vars.title }}</h1>
-    <div class="content">
-        <p>{{ .Page.Vars.text }}</p>
-
-
-        <div>
-            {{ $entity := .HomeAssistant.Entities.FridgeTempYellow }}
-            <span class="icon">device_thermostat</span>{{ $entity.Attributes.friendly_name }}: {{ $entity.State }}{{ $entity.Attributes.unit_of_measurement }}
-        </div>
-        <div>
-            {{ $entity = .HomeAssistant.Entities.FridgeTempRed }}
-            <span class="icon">device_thermostat</span>{{ $entity.Attributes.friendly_name }}: {{ $entity.State }}{{ $entity.Attributes.unit_of_measurement }}
-        </div>
+<h1>Overview</h1>
+<div>
+    <p>Here you can see the current temperature of the fridge.</p>
+    <div>
+        {{ $entity := .HomeAssistant.Entities.FridgeTempYellow }}
+        <span class="icon">device_thermostat</span>{{ $entity.Attributes.friendly_name }}: {{ $entity.State }}{{ $entity.Attributes.unit_of_measurement }}
+    </div>
+    <div>
+        {{ $entity = .HomeAssistant.Entities.FridgeTempRed }}
+        <span class="icon">device_thermostat</span>{{ $entity.Attributes.friendly_name }}: {{ $entity.State }}{{ $entity.Attributes.unit_of_measurement }}
     </div>
 </div>

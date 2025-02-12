@@ -1,0 +1,61 @@
+{{ define "timeline" }}
+    <style>
+        .timeline {
+            display: grid;
+            grid-template-columns: auto 1fr;
+        }
+
+        .timeline > * {
+            border-bottom: 2px solid black;
+        }
+
+        .timeline-day-date {
+            padding: 10px;
+            font-size: 24px;
+            font-weight: bolder;
+        }
+
+        .timeline-day-events {
+            display: flex;
+            flex-direction: column;
+            column-gap: 10px;
+            padding: 10px;
+        }
+
+        .timeline-day-events-event {
+            font-size: 24px;
+        }
+
+        .timeline-day-events-event p {
+            margin: 0;
+        }
+    </style>
+
+    <div class="timeline">
+        {{ range $index, $day := . }}
+            {{ if eq $index 6 }}
+                {{ break }}
+            {{ end }}
+            {{ if eq (len $day.Events) 0}}
+                {{ continue }}
+            {{ end }}
+            <span class="timeline-day-date">
+                    {{ $day.Time | formatTimeToRelDay }}
+                </span>
+            <div class="timeline-day-events">
+                {{ range $index, $event := $day.Events }}
+                    <div class="timeline-day-events-event">
+                        {{ if ne $event.Summary "" }}
+                            <p>{{ $event.Summary }}</p>
+                        {{ else  if ne $event.Description "" }}
+                            <p>{{ $event.Description }}</p>
+                        {{ end }}
+                        {{ if ne $event.Location "" }}
+                            <p><strong>Location:</strong> {{ $event.Location }}</p>
+                        {{ end }}
+                    </div>
+                {{ end }}
+            </div>
+        {{ end }}
+    </div>
+{{ end }}

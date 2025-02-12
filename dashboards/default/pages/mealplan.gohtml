@@ -1,10 +1,5 @@
----
-title: Meal Plan
-text: Welcome to the meal plan dashboard.
----
-<div id="page">
-	<h1>{{ .Vars.title }}</h1>
-	<div class="content">
-		<p>{{ .Vars.text }}</p>
-	</div>
+<h1>Meal plan</h1>
+<div>
+    {{ $days := .HomeAssistant.Calendars.Mealie }}
+    {{ template "timeline" $days }}
 </div>

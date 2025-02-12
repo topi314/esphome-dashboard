@@ -1,0 +1,30 @@
+{{ define "pages" }}
+    <style>
+        .pages {
+            display: flex;
+            justify-content: center;
+            column-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-circle {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            border: 2px solid black;
+        }
+
+        .page-circle-filled {
+            background-color: black;
+        }
+    </style>
+    <div class="pages">
+        {{ range $i := (seq .PageCount) }}
+            {{ if eq $i $.PageIndex }}
+                <span class="page-circle page-circle-filled"></span>
+            {{ else }}
+                <span class="page-circle"></span>
+            {{ end }}
+        {{ end }}
+    </div>
+{{ end }}

@@ -1,0 +1,5 @@
+<h1>Weather</h1>
+<div>
+    {{ $forecast := index .HomeAssistant.Services.WeatherForecasts.ServiceResponse "weather.forecast_home" }}
+    {{ template "forecast" $forecast }}
+</div>

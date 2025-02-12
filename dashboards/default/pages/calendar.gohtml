@@ -1,9 +1,5 @@
----
-title: Calendar
----
-<div id="page">
-	<h1>{{ .Vars.title }}</h1>
-	<div class="content">
-		{{ template "calendar" .Vars }}
-	</div>
+<h1>Calendar</h1>
+<div class="container">
+    {{ $days := .HomeAssistant.Calendars.Mealie }}
+    {{ template "calendar" $days }}
 </div>

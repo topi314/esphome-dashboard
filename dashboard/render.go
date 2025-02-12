@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
@@ -43,13 +44,25 @@ type PageRenderData struct {
 
 type HomeAssistantRenderData struct {
 	Entities  map[string]homeassistant.EntityState
-	Calendars map[string][]homeassistant.CalendarEvent
+	Calendars map[string][]CalendarDay
 	Services  map[string]homeassistant.Response
+}
+
+type CalendarDay struct {
+	Time   time.Time
+	Past   bool
+	Events []homeassistant.CalendarEvent
+}
+
+func (d CalendarDay) Today() bool {
+	year, month, day := time.Now().Date()
+	return d.Time.Year() == year && d.Time.Month() == month && d.Time.Day() == day
 }
 
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"seq":                 seq,
+		"reverse":             reverse,
 		"parseTime":           parseTime,
 		"convertNewLinesToBR": convertNewLinesToBR,
 		"safeHTML":            safeHTML,
@@ -60,6 +73,7 @@ func (s *Server) templateFuncs() template.FuncMap {
 		"safeJSStr":           safeJSStr,
 		"safeSrcset":          safeSrcset,
 		"formatTimeToDay":     formatTimeToDay,
+		"formatTimeToRelDay":  formatTimeToRelDay,
 	}
 }
 
@@ -108,9 +122,6 @@ func (s *Server) renderDashboard(ctx context.Context, base Base, options RenderO
 		Assets:        base.Assets,
 		HomeAssistant: homeAssistantRenderData,
 	}
-
-	// jsonData, _ := json.MarshalIndent(data, "", "  ")
-	// slog.DebugContext(ctx, "rendering dashboard", slog.String("data", string(jsonData)))
 
 	var buf bytes.Buffer
 	if err = baseTemplate.ExecuteTemplate(&buf, "base", data); err != nil {

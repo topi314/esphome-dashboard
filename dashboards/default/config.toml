@@ -4,12 +4,11 @@ height = 454
 base = 'base.gohtml'
 pages = [
     'pages/overview.gohtml',
-    'pages/weather.gohtml',
+    'pages/forecast.gohtml',
     'pages/mealplan.gohtml',
     'pages/calendar.gohtml',
 ]
 assets = [
-    'assets/materialsymbols.ttf',
     'assets/gothamrnd.otf'
 ]
 
@@ -20,8 +19,7 @@ entities = [
     { name = 'Forecast', id = 'weather.forecast_home' },
 ]
 calendars = [
-    { name = 'Lunch', id = 'calendar.mealie_lunch', days = 7 },
-    { name = 'Dinner', id = 'calendar.mealie_dinner', days = 7 },
+    { name = 'Mealie', ids = ['calendar.mealie_dinner', 'calendar.mealie_lunch'], days = 7 },
 ]
 services = [
     { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
