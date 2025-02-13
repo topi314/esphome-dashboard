@@ -10,14 +10,6 @@ esphome:
     priority: 375
     then:
       - component.update: eink_display
-      # If after 10 minutes, the device is still initializing, turn off the init_in_progress variable
-      - delay: 10min
-      - if:
-          condition:
-            lambda: return id(init_in_progress);
-          then:
-            - lambda: id(init_in_progress) = false;
-            - component.update: eink_display
 
 esp32:
   board: esp32dev
@@ -28,16 +20,16 @@ wifi:
   id: wifi_id
   on_connect:
     - component.update: eink_display
+    - sensor.template.publish:
+        id: current_page_index
+        state: 0
   on_disconnect:
     - component.update: eink_display
 
 api:
+  id: api_id
   on_client_connected:
-    - lambda: id(init_in_progress) = false;
     - component.update: eink_display
-    - sensor.template.publish:
-        id: current_page_index
-        state: 0
 
 logger:
   level: VERBOSE
@@ -46,13 +38,6 @@ logger:
 
 esp32_touch:
   setup_mode: false
-
-globals:
-  # Global initialization variable. Initialized to true and set to false once everything is connected
-  - id: init_in_progress
-    type: bool
-    restore_value: no
-    initial_value: "true"
 
 binary_sensor:
   - platform: esp32_touch
@@ -181,19 +166,26 @@ script:
       action: string
     then:
       - script.stop: refresh
-      - http_request.get:
-          url: !lambda |-
-            return ((std::string) "${base_url}/dashboards/${dashboard_name}/control?page=" + std::to_string(static_cast<int>(id(current_page_index).state)) + "&action=" + action).c_str();
-          capture_response: true
-          on_response:
-            then:
-              - sensor.template.publish:
-                  id: current_page_index
-                  state: !lambda |-
-                    return std::stof(body);
-          on_error:
-            then:
-              - script.execute: refresh
+      - if:
+          condition:
+            not:
+              wifi.connected:
+          then:
+            - script.execute: refresh
+          else:
+            - http_request.get:
+                url: !lambda |-
+                  return ((std::string) "${base_url}/dashboards/${dashboard_name}/control?page=" + std::to_string(static_cast<int>(id(current_page_index).state)) + "&action=" + action).c_str();
+                capture_response: true
+                on_response:
+                  then:
+                    - sensor.template.publish:
+                        id: current_page_index
+                        state: !lambda |-
+                          return std::stof(body);
+                on_error:
+                  then:
+                    - script.execute: refresh
   - id: refresh
     mode: restart
     then:
@@ -229,15 +221,14 @@ spi:
   mosi_pin: GPIO14
 
 font:
-  - file: "fonts/Tahoma.ttf"
-    id: font1
-    size: 32
   - file: "gfonts://Material+Symbols+Outlined"
     id: icons
     size: 24
     glyphs: [
       "\U0000e63e", # wifi
       "\U0000eb31", # wifi-find
+      "\U0000e2bd", # cloud
+      "\U0000e2c1", # cloud-off
     ]
 
 display:
@@ -254,14 +245,16 @@ display:
     rotation: ${display_rotation}
     reset_duration: 2ms
     lambda: |-
-      if (id(init_in_progress)) {
-        it.print(400, 200, id(font1), TextAlign::CENTER, "Initializing...");
-      } else {
-        it.image(0, 0, id(current_page), COLOR_OFF, COLOR_ON);
-      }
+      it.image(0, 0, id(current_page), COLOR_OFF, COLOR_ON);
 
       if (id(wifi_id).is_connected()) {
         it.print(0, 0, id(icons), "\U0000e63e");
       } else {
         it.print(0, 0, id(icons), "\U0000eb31");
+      }
+      
+      if (id(api_id).is_connected()) {
+        it.print(24, 0, id(icons), "\U0000e2bd");
+      } else {
+        it.print(24, 0, id(icons), "\U0000e2c1");
       }
