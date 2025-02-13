@@ -41,6 +41,16 @@ func (d Date) Time() time.Time {
 	return d.DateTime
 }
 
+func (d Date) Day() time.Time {
+	year, month, day := d.Time().Date()
+	return time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+}
+
+func (d Date) IsFullDay() bool {
+	t := d.Time()
+	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
+}
+
 type Response struct {
 	ChangedStates   []EntityState  `json:"changed_states"`
 	ServiceResponse map[string]any `json:"service_response"`

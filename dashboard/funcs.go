@@ -17,6 +17,26 @@ func seq(n int) []int {
 	return s
 }
 
+func add(a int, b int) int {
+	return a + b
+}
+
+func sub(a int, b int) int {
+	return a - b
+}
+
+func mul(a int, b int) int {
+	return a * b
+}
+
+func div(a int, b int) int {
+	return a / b
+}
+
+func mod(a int, b int) int {
+	return a % b
+}
+
 func reverse(l any) (any, error) {
 	if l == nil {
 		return nil, errors.New("sequence must be provided")
@@ -48,7 +68,7 @@ func parseTime(s string) (time.Time, error) {
 }
 
 func formatTimeToDay(t time.Time) string {
-	return t.Format("Mon _2 ")
+	return t.Format("Mon _2 Jan")
 }
 
 func formatTimeToRelDay(t time.Time) string {

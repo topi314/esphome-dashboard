@@ -1,10 +1,6 @@
 {{ define "calendar" }}
     <style>
         .calendar {
-
-        }
-
-        .calendar-table {
             height: 100%;
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -21,6 +17,8 @@
             border-bottom: 2px black dashed;
             background-color: black;
             color: white;
+            font-weight: bold;
+            font-size: 12px;
         }
 
         .calendar-table-header:nth-child(7n) {
@@ -34,7 +32,6 @@
 
             border-bottom: 2px black solid;
             border-right: 2px black solid;
-            font-size: 12px;
         }
 
         .calendar-table-cell:nth-child(7n) {
@@ -47,8 +44,14 @@
 
         .calendar-table-cell-day {
             text-align: center;
-            font-size: 16px;
-            font-weight: bold;
+            font-weight: bolder;
+            margin: 2px;
+            border-radius: 12px;
+        }
+
+        .calendar-table-cell-day-today {
+            background-color: black;
+            color: white;
         }
 
         .calendar-table-cell-events {
@@ -56,33 +59,43 @@
             flex-direction: column;
             align-items: stretch;
             white-space: nowrap;
-            padding: 2px;
+            padding: 0 2px;
             flex-grow: 1;
+            font-size: 12px;
         }
 
         .calendar-table-cell-events span {
             overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-table-cell-events span:last-child {
+            border-bottom: none;
         }
     </style>
     <div class="calendar">
-        <div class="calendar-table">
-            <div class="calendar-table-header">MON</div>
-            <div class="calendar-table-header">TUE</div>
-            <div class="calendar-table-header">WED</div>
-            <div class="calendar-table-header">THU</div>
-            <div class="calendar-table-header">FRI</div>
-            <div class="calendar-table-header">SAT</div>
-            <div class="calendar-table-header">SUN</div>
-            {{ range $index, $day := . }}
-                <div class="calendar-table-cell">
-                    <span class="calendar-table-cell-day">{{ $day.Time.Format "2" }}</span>
-                    <div class="calendar-table-cell-events">
-                        {{ range $index, $event := $day.Events}}
-                            <span>{{ $event.Summary }}</span>
-                        {{ end }}
-                    </div>
+        <div class="calendar-table-header">MON</div>
+        <div class="calendar-table-header">TUE</div>
+        <div class="calendar-table-header">WED</div>
+        <div class="calendar-table-header">THU</div>
+        <div class="calendar-table-header">FRI</div>
+        <div class="calendar-table-header">SAT</div>
+        <div class="calendar-table-header">SUN</div>
+        {{ range $index, $day := . }}
+            <div class="calendar-table-cell">
+                <span class="calendar-table-cell-day {{ if $day.IsToday }}calendar-table-cell-day-today{{ end }}">{{ $day.Time.Format "2" }}</span>
+                <div class="calendar-table-cell-events">
+                    {{ range $index, $event := $day.Events}}
+                        <span>
+                                {{ if not $event.Start.IsFullDay }}
+                                    {{ $event.Start.Time.Format "15:04" }}
+                                {{ end }}
+                            {{ $event.Summary }}
+                            </span>
+                    {{ end }}
                 </div>
-            {{ end }}
-        </div>
+            </div>
+        {{ end }}
     </div>
 {{ end }}

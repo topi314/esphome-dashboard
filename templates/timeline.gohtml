@@ -36,7 +36,7 @@
             {{ if eq $index 6 }}
             {{ break }}
             {{ end }}
-            {{ if or (eq (len $day.Events) 0) $day.Past }}
+            {{ if or (eq (len $day.Events) 0) $day.IsPast }}
                 {{ continue }}
             {{ end }}
             <span class="timeline-day-date">{{ $day.Time | formatTimeToRelDay }}</span>

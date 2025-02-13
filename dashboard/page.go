@@ -33,9 +33,10 @@ type EntityConfig struct {
 }
 
 type CalendarConfig struct {
-	Name string   `toml:"name"`
-	IDs  []string `toml:"ids"`
-	Days int      `toml:"days"`
+	Name      string   `toml:"name"`
+	IDs       []string `toml:"ids"`
+	Days      int      `toml:"days"`
+	MaxEvents int      `toml:"max_events"`
 }
 
 type ServiceConfig struct {

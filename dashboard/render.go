@@ -49,14 +49,20 @@ type HomeAssistantRenderData struct {
 }
 
 type CalendarDay struct {
-	Time   time.Time
-	Past   bool
-	Events []homeassistant.CalendarEvent
+	Time    time.Time
+	IsPast  bool
+	IsToday bool
+	Events  []homeassistant.CalendarEvent
 }
 
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"seq":                 seq,
+		"add":                 add,
+		"sub":                 sub,
+		"mul":                 mul,
+		"div":                 div,
+		"mod":                 mod,
 		"now":                 time.Now,
 		"dict":                dict,
 		"reverse":             reverse,
