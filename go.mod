@@ -1,12 +1,12 @@
 module github.com/topi314/esphome-dashboard
 
-go 1.23
+go 1.24
 
 require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/adrg/frontmatter v0.2.0
 	github.com/charmbracelet/log v0.4.0
-	github.com/chromedp/cdproto v0.0.0-20250208210249-fa305b1d5b8a
+	github.com/chromedp/cdproto v0.0.0-20250210231439-aea867ea8506
 	github.com/chromedp/chromedp v0.12.1
 	github.com/muesli/termenv v0.15.2
 )
@@ -26,7 +26,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/exp v0.0.0-20250207012021-f9890c6ad9f3 // indirect
+	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

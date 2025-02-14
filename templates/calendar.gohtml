@@ -61,7 +61,7 @@
             white-space: nowrap;
             padding: 0 2px;
             flex-grow: 1;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .calendar-table-cell-events span {
@@ -88,9 +88,9 @@
                 <div class="calendar-table-cell-events">
                     {{ range $index, $event := $day.Events}}
                         <span>
-                                {{ if not $event.Start.IsFullDay }}
-                                    {{ $event.Start.Time.Format "15:04" }}
-                                {{ end }}
+                            {{ if not ($event.IsFullDay $day.Time) }}
+                                {{ $event.Start.Time.Format "15:04" }}
+                            {{ end }}
                             {{ $event.Summary }}
                             </span>
                     {{ end }}

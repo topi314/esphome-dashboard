@@ -49,7 +49,7 @@ func (s *Server) fetchHomeAssistantEntities(ctx context.Context, entities []Enti
 
 func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []CalendarConfig) (map[string][]CalendarDay, error) {
 	year, month, day := time.Now().Date()
-	start := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+	start := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 	start = start.AddDate(0, 0, -weekdayToIndex(start.Weekday())) // move start at the beginning of the week
 
 	days := make(map[string][]CalendarDay)
@@ -74,7 +74,7 @@ func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []Ca
 
 func fillAndSortCalendarDays(calendar CalendarConfig, events []homeassistant.CalendarEvent, start time.Time) []CalendarDay {
 	nowYear, nowMonth, nowDay := time.Now().Date()
-	now := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, time.Local)
+	now := time.Date(nowYear, nowMonth, nowDay, 0, 0, 0, 0, time.UTC)
 
 	end := start.AddDate(0, 0, 28) // add 4 weeks
 
@@ -127,6 +127,14 @@ func fillAndSortCalendarDays(calendar CalendarConfig, events []homeassistant.Cal
 				return 0
 			}
 		})
+	}
+
+	if calendar.SkipPastEvents {
+		for i := range days {
+			if days[i].IsPast {
+				days[i].Events = nil
+			}
+		}
 	}
 
 	if calendar.MaxEvents > 0 {

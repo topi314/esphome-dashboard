@@ -1,15 +1,27 @@
-debug = false
+# Enable hot reloading of the built-in templates (only useful for development)
+dev = false
+# The address & port the server should listen on
 listen_addr = "0.0.0.0:1234"
-dashboard_dir = "dashboards"
+# The directory where your dashboards are stored
+dashboard_dir = "/var/lib/esphome-dashboard/dashboards/"
 
 [log]
-level = "debug"
+# The log level (debug, info, warn, error)
+level = "info"
+# The log format (text, json, log-fmt)
 format = "text"
+# Whether to add the source location to the log output
 add_source = true
+# Whether to add the log level to the log output (only useful for text format)
 no_color = false
 
+# The Home Assistant configuration (optional)
 [home_assistant]
+# The hostname/IP of your Home Assistant instance
 host = "localhost"
+# The port of your Home Assistant instance
 port = 80
+# Whether to use HTTPS or HTTP to connect to Home Assistant
 secure = false
+# The Home Assistant API token
 token = ""

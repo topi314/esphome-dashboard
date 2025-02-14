@@ -25,6 +25,23 @@ type CalendarEvent struct {
 	Location    string `json:"location"`
 }
 
+func (e CalendarEvent) IsFullDay(day time.Time) bool {
+	startTime := e.Start.Time()
+	endTime := e.End.Time()
+
+	// if the event is a full day event (starts at 00:00)
+	if startTime.Equal(day) {
+		return true
+	}
+
+	// if the event is over multiple days the events between the start and end day are full day events
+	if startTime.Before(day) && endTime.After(day) {
+		return true
+	}
+
+	return false
+}
+
 type Date struct {
 	DateTime time.Time `json:"dateTime"`
 	Date     string    `json:"date"`
@@ -43,12 +60,7 @@ func (d Date) Time() time.Time {
 
 func (d Date) Day() time.Time {
 	year, month, day := d.Time().Date()
-	return time.Date(year, month, day, 0, 0, 0, 0, time.Local)
-}
-
-func (d Date) IsFullDay() bool {
-	t := d.Time()
-	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
+	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 }
 
 type Response struct {

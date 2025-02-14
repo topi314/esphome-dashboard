@@ -1,5 +1,5 @@
 {{ define "timeline" }}
-	<style>
+    <style>
         .timeline {
             display: grid;
             grid-template-columns: auto 1fr;
@@ -10,8 +10,8 @@
         }
 
         .timeline > *:nth-last-child(-n+2) {
-			border-bottom: none;
-		}
+            border-bottom: none;
+        }
 
         .timeline-day-date {
             padding: 10px;
@@ -26,24 +26,24 @@
             padding: 10px;
             font-size: 24px;
         }
-	</style>
+    </style>
 
-	<div class="timeline">
+    <div class="timeline">
         {{ range $index, $day := . }}
-            {{ if or (eq (len $day.Events) 0) $day.IsPast }}
+            {{ if eq (len $day.Events) 0 }}
                 {{ continue }}
             {{ end }}
-			<span class="timeline-day-date">{{ $day.Time | formatTimeToRelDay }}</span>
-			<div class="timeline-day-events">
+            <span class="timeline-day-date">{{ $day.Time | formatTimeToRelDay }}</span>
+            <div class="timeline-day-events">
                 {{ range $index, $event := $day.Events }}
-					<span class="timeline-day-events-event">
-						{{ if not $event.Start.IsFullDay }}
+                    <span class="timeline-day-events-event">
+                        {{ if not ($event.IsFullDay $day.Time ) }}
                             {{ $event.Start.Time.Format "15:04" }}
                         {{ end }}
                         {{ $event.Summary }}
-					</span>
+                    </span>
                 {{ end }}
-			</div>
+            </div>
         {{ end }}
-	</div>
+    </div>
 {{ end }}

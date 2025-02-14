@@ -41,7 +41,7 @@ func main() {
 	slog.Info("Config loaded", slog.Any("config", cfg))
 
 	var t fs.FS
-	if cfg.Debug {
+	if cfg.Dev {
 		t = os.DirFS(".")
 	} else {
 		t = templates

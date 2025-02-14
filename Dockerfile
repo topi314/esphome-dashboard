@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.23-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS build
 
 WORKDIR /build
 
@@ -19,7 +19,7 @@ FROM chromedp/headless-shell
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
-	fonts-freefont-ttf \
+    fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=build /build/esphome-dashboard /bin/esphome-dashboard

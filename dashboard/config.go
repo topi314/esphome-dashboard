@@ -40,19 +40,19 @@ func defaultConfig() Config {
 }
 
 type Config struct {
-	Log           LogConfig           `toml:"log"`
-	Debug         bool                `toml:"debug"`
-	ListenAddr    string              `toml:"listen_addr"`
-	DashboardDir  string              `toml:"dashboard_dir"`
-	HomeAssistant HomeAssistantConfig `toml:"home_assistant"`
+	Dev           bool                 `toml:"dev"`
+	ListenAddr    string               `toml:"listen_addr"`
+	DashboardDir  string               `toml:"dashboard_dir"`
+	Log           LogConfig            `toml:"log"`
+	HomeAssistant *HomeAssistantConfig `toml:"home_assistant"`
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("Log: %s\n Debug: %t\n ListenAddr: %s\n DashboardDir: %s\n HomeAssistant: %s",
-		c.Log,
-		c.Debug,
+	return fmt.Sprintf("Dev: %t\nListenAddr: %s\nDashboardDir: %s\nLog: %s\nHomeAssistant: %v",
+		c.Dev,
 		c.ListenAddr,
 		c.DashboardDir,
+		c.Log,
 		c.HomeAssistant,
 	)
 }
@@ -73,7 +73,7 @@ type LogConfig struct {
 }
 
 func (c LogConfig) String() string {
-	return fmt.Sprintf("\n  Level: %s\n  Format: %s\n  AddSource: %t\n  NoColor: %t",
+	return fmt.Sprintf("\n Level: %s\n Format: %s\n AddSource: %t\n NoColor: %t",
 		c.Level,
 		c.Format,
 		c.AddSource,
@@ -98,7 +98,7 @@ func (c HomeAssistantConfig) URL() string {
 }
 
 func (c HomeAssistantConfig) String() string {
-	return fmt.Sprintf("\n  Host: %s\n  Port: %d\n  Secure: %t\n  Token: %s",
+	return fmt.Sprintf("\n Host: %s\n Port: %d\n Secure: %t\n Token: %s",
 		c.Host,
 		c.Port,
 		c.Secure,

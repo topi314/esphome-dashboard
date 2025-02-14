@@ -21,7 +21,10 @@ func New(cfg Config, templates fs.FS) *Server {
 		encoder: &png.Encoder{
 			CompressionLevel: png.BestCompression,
 		},
-		homeAssistant: homeassistant.New(cfg.HomeAssistant.URL(), cfg.HomeAssistant.Token),
+	}
+
+	if cfg.HomeAssistant != nil {
+		s.homeAssistant = homeassistant.New(cfg.HomeAssistant.URL(), cfg.HomeAssistant.Token)
 	}
 
 	s.server = &http.Server{
@@ -41,11 +44,15 @@ type Server struct {
 }
 
 func (s *Server) Start() {
-	status, err := s.homeAssistant.Test(context.Background())
-	if err != nil {
-		slog.Error("failed to connect to home assistant", slog.Any("err", err))
+	if s.homeAssistant != nil {
+		status, err := s.homeAssistant.Test(context.Background())
+		if err != nil {
+			slog.Error("failed to connect to home assistant", slog.Any("err", err))
+		} else {
+			slog.Info("connected to home assistant", slog.String("status", status))
+		}
 	} else {
-		slog.Info("connected to home assistant", slog.String("status", status))
+		slog.Info("home assistant not configured, skipping connection test")
 	}
 
 	allocCtx, allocCancel := chromedp.NewExecAllocator(context.Background(), append(chromedp.DefaultExecAllocatorOptions[:], chromedp.NoSandbox)...)
@@ -53,7 +60,7 @@ func (s *Server) Start() {
 
 	chromeCtx, chromeCancel := chromedp.NewContext(allocCtx)
 	defer chromeCancel()
-	if err = chromedp.Run(chromeCtx, chromedp.Navigate("about:blank")); err != nil {
+	if err := chromedp.Run(chromeCtx, chromedp.Navigate("about:blank")); err != nil {
 		slog.Error("failed to start chrome", slog.Any("err", err))
 		return
 	}

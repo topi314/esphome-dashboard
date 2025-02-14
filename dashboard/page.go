@@ -12,7 +12,6 @@ import (
 )
 
 type DashboardConfig struct {
-	Name          string                       `toml:"name"`
 	Height        int                          `toml:"height"`
 	Width         int                          `toml:"width"`
 	Base          string                       `toml:"base"`
@@ -33,10 +32,11 @@ type EntityConfig struct {
 }
 
 type CalendarConfig struct {
-	Name      string   `toml:"name"`
-	IDs       []string `toml:"ids"`
-	Days      int      `toml:"days"`
-	MaxEvents int      `toml:"max_events"`
+	Name           string   `toml:"name"`
+	IDs            []string `toml:"ids"`
+	Days           int      `toml:"days"`
+	MaxEvents      int      `toml:"max_events"`
+	SkipPastEvents bool     `toml:"skip_past_events"`
 }
 
 type ServiceConfig struct {
