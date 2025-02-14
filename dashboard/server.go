@@ -3,6 +3,7 @@ package dashboard
 import (
 	"context"
 	"errors"
+	"fmt"
 	"image/png"
 	"io/fs"
 	"log/slog"
@@ -14,9 +15,11 @@ import (
 	"github.com/topi314/esphome-dashboard/dashboard/homeassistant"
 )
 
-func New(cfg Config, templates fs.FS) *Server {
+func New(cfg Config, version string, goVersion string, templates fs.FS) *Server {
 	s := &Server{
 		cfg:       cfg,
+		version:   version,
+		goVersion: goVersion,
 		templates: templates,
 		encoder: &png.Encoder{
 			CompressionLevel: png.BestCompression,
@@ -28,7 +31,7 @@ func New(cfg Config, templates fs.FS) *Server {
 	}
 
 	s.server = &http.Server{
-		Addr:    cfg.ListenAddr,
+		Addr:    fmt.Sprintf("%s:%d", cfg.ListenAddr, cfg.ListenPort),
 		Handler: s.Routes(),
 	}
 
@@ -37,6 +40,8 @@ func New(cfg Config, templates fs.FS) *Server {
 
 type Server struct {
 	cfg           Config
+	version       string
+	goVersion     string
 	templates     fs.FS
 	server        *http.Server
 	encoder       *png.Encoder

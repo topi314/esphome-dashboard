@@ -34,7 +34,8 @@ func defaultConfig() Config {
 			AddSource: false,
 			NoColor:   false,
 		},
-		ListenAddr:   ":8080",
+		ListenAddr:   "",
+		ListenPort:   8080,
 		DashboardDir: "dashboards",
 	}
 }
@@ -42,6 +43,7 @@ func defaultConfig() Config {
 type Config struct {
 	Dev           bool                 `toml:"dev"`
 	ListenAddr    string               `toml:"listen_addr"`
+	ListenPort    int                  `toml:"listen_port"`
 	DashboardDir  string               `toml:"dashboard_dir"`
 	Log           LogConfig            `toml:"log"`
 	HomeAssistant *HomeAssistantConfig `toml:"home_assistant"`

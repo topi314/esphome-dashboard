@@ -13,7 +13,5 @@ esphome:
   name_add_mac_suffix: false
 
 wifi:
-  ap:
-    ssid: "Dashboard"
   ssid: !secret wifi_ssid
   password: !secret wifi_password

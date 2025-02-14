@@ -1,49 +1,55 @@
-<style>
-    @font-face {
-        font-family: 'Gotham Round';
-        font-style: normal;
-        src: url("{{ (index .Assets "assets/gothamrnd.otf") | safeURL }}") format("opentype");
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+        @font-face {
+            font-family: 'Gotham Round';
+            font-style: normal;
+            src: url("../assets/gothamrnd.otf") format("opentype");
+        }
 
-    * {
-        box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    html, body {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        font-family: 'Gotham Round', system-ui;
-    }
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Gotham Round', system-ui;
+        }
 
-    body {
-        display: flex;
-        flex-direction: column;
-    }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
 
-    h1 {
-        margin: 0;
-        font-size: 40px;
-        text-transform: uppercase;
-        font-weight: bolder;
-    }
+        h1 {
+            margin: 0;
+            font-size: 40px;
+            text-transform: uppercase;
+            font-weight: bolder;
+        }
 
-    .page {
-        width: 100%;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        overflow: hidden;
-    }
+        .page {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
 
-    .container {
-        height: 100%;
-        width: 100%;
-        padding: 0 10px;
-    }
-</style>
+        .container {
+            height: 100%;
+            width: 100%;
+            padding: 0 10px;
+        }
+	</style>
+
+</head>
 <body id="root">
 <div class="page">
     {{ template "page" . }}
@@ -51,3 +57,4 @@
 {{ template "pages" . }}
 {{ template "gen-time" }}
 </body>
+</html>

@@ -1,7 +1,9 @@
 # Enable hot reloading of the built-in templates (only useful for development)
 dev = false
-# The address & port the server should listen on
-listen_addr = "0.0.0.0:1234"
+# The address the server should listen on
+listen_addr = "0.0.0.0"
+# The port the server should listen on
+listen_port = 8080
 # The directory where your dashboards are stored
 dashboard_dir = "/var/lib/esphome-dashboard/dashboards/"
 

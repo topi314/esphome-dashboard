@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"runtime"
 	"runtime/debug"
 	"syscall"
 
@@ -33,11 +32,13 @@ func main() {
 	setupLogger(cfg.Log)
 
 	version := "unknown"
+	goVersion := "unknown"
 	if info, ok := debug.ReadBuildInfo(); ok {
 		version = info.Main.Version
+		goVersion = info.GoVersion
 	}
 
-	slog.Info("Starting dashboard...", slog.String("version", version), slog.String("go_version", runtime.Version()))
+	slog.Info("Starting dashboard...", slog.String("version", version), slog.String("go_version", goVersion))
 	slog.Info("Config loaded", slog.Any("config", cfg))
 
 	var t fs.FS
@@ -47,7 +48,7 @@ func main() {
 		t = templates
 	}
 
-	s := dashboard.New(cfg, t)
+	s := dashboard.New(cfg, version, goVersion, t)
 	go s.Start()
 
 	slog.Info("Dashboard started", slog.Any("addr", cfg.ListenAddr))

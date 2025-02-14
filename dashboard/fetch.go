@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"slices"
 	"time"
@@ -37,7 +36,7 @@ func (s *Server) fetchHomeAssistantEntities(ctx context.Context, entities []Enti
 	states := make(map[string]homeassistant.EntityState)
 	for _, entity := range entities {
 		state, err := s.homeAssistant.GetState(ctx, entity.ID)
-		if err != nil && !errors.Is(err, context.Canceled) {
+		if err != nil {
 			slog.ErrorContext(ctx, "failed to get entity state", slog.String("entity", entity.Name), slog.String("entity_id", entity.ID), slog.Any("err", err))
 			continue
 		}
@@ -59,7 +58,7 @@ func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []Ca
 		var allEvents []homeassistant.CalendarEvent
 		for _, id := range calendar.IDs {
 			events, err := s.homeAssistant.GetCalendar(ctx, id, start, end)
-			if err != nil && !errors.Is(err, context.Canceled) {
+			if err != nil {
 				slog.ErrorContext(ctx, "failed to get calendar", slog.String("calendar", calendar.Name), slog.String("entity_id", id), slog.Any("err", err))
 				continue
 			}
@@ -185,7 +184,7 @@ func (s *Server) fetchHomeAssistantServices(ctx context.Context, services []Serv
 		}
 
 		response, err := s.homeAssistant.CallService(ctx, service.Domain, service.Service, bytes.NewReader(data), service.ReturnResponse)
-		if err != nil && !errors.Is(err, context.Canceled) {
+		if err != nil {
 			slog.ErrorContext(ctx, "failed to call service", slog.String("domain", service.Domain), slog.String("service", service.Service), slog.Any("err", err))
 			continue
 		}

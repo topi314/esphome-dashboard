@@ -18,18 +18,11 @@ import (
 	"github.com/topi314/esphome-dashboard/dashboard/homeassistant"
 )
 
-type RenderOptions struct {
-	Width     int
-	Height    int
-	PrintHTML bool
-}
-
 type RenderData struct {
 	PageIndex     int
 	PageCount     int
 	Pages         []PageRenderData
 	Vars          map[string]any
-	Assets        map[string]string `json:"-"`
 	HomeAssistant HomeAssistantRenderData
 }
 
@@ -58,11 +51,6 @@ type CalendarDay struct {
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"seq":                 seq,
-		"add":                 add,
-		"sub":                 sub,
-		"mul":                 mul,
-		"div":                 div,
-		"mod":                 mod,
 		"now":                 time.Now,
 		"dict":                dict,
 		"reverse":             reverse,
@@ -80,7 +68,7 @@ func (s *Server) templateFuncs() template.FuncMap {
 	}
 }
 
-func (s *Server) renderDashboard(ctx context.Context, base Base, options RenderOptions) (io.Reader, int, error) {
+func (s *Server) executeDashboard(ctx context.Context, base Base) (io.Reader, int, error) {
 	baseTemplate, err := template.New("base").
 		Funcs(s.templateFuncs()).
 		Parse(string(base.Body))
@@ -122,7 +110,6 @@ func (s *Server) renderDashboard(ctx context.Context, base Base, options RenderO
 		PageCount:     len(base.Config.Pages),
 		Pages:         pageRenderData,
 		Vars:          base.Vars,
-		Assets:        base.Assets,
 		HomeAssistant: homeAssistantRenderData,
 	}
 
@@ -131,26 +118,20 @@ func (s *Server) renderDashboard(ctx context.Context, base Base, options RenderO
 		return nil, 0, fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	if options.PrintHTML {
-		return &buf, buf.Len(), nil
-	}
+	return &buf, buf.Len(), nil
+}
 
+func (s *Server) renderDashboard(ctx context.Context, dashboard string, pageIndex int, width int, height int) (io.Reader, int, error) {
 	var cancel context.CancelFunc
 	ctx, cancel = chromedp.NewContext(ctx)
 	defer cancel()
 
 	var res []byte
-	if err = chromedp.Run(ctx,
-		chromedp.EmulateViewport(int64(options.Width), int64(options.Height)),
-		chromedp.Navigate("about:blank"),
+	if err := chromedp.Run(ctx,
+		chromedp.EmulateViewport(int64(width), int64(height)),
+		chromedp.Navigate(fmt.Sprintf("http://localhost:%d/dashboards/%s/pages/%d?html=1", s.cfg.ListenPort, dashboard, pageIndex)),
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			frameTree, err := page.GetFrameTree().Do(ctx)
-			if err != nil {
-				return err
-			}
-			return page.SetDocumentContent(frameTree.Frame.ID, buf.String()).Do(ctx)
-		}),
-		chromedp.ActionFunc(func(ctx context.Context) error {
+			var err error
 			res, err = page.CaptureScreenshot().
 				WithFormat(page.CaptureScreenshotFormatPng).
 				WithFromSurface(true).

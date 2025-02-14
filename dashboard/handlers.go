@@ -6,7 +6,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type Action string
@@ -18,6 +20,14 @@ const (
 	ActionPrevPage  Action = "prev_page"
 	ActionFirstPage Action = "first_page"
 )
+
+func (s *Server) getVersion(w http.ResponseWriter, r *http.Request) {
+	slog.InfoContext(r.Context(), "getVersion")
+
+	if _, err := fmt.Fprintf(w, "Dashboard %s (Go %s)", s.version, s.goVersion); err != nil {
+		Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
+	}
+}
 
 func (s *Server) getControl(w http.ResponseWriter, r *http.Request) {
 	dashboard := r.PathValue("dashboard")
@@ -42,7 +52,6 @@ func (s *Server) getControl(w http.ResponseWriter, r *http.Request) {
 
 	if _, err = w.Write([]byte(fmt.Sprintf("%d", pageIndex))); err != nil {
 		Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
-		return
 	}
 }
 
@@ -70,32 +79,52 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	base, err := s.loadDashboard(dashboard, pageIndex)
+	if html {
+		base, err := s.loadDashboard(dashboard, pageIndex)
+		if err != nil {
+			Error(r.Context(), w, fmt.Sprintf("failed to get next page: %s", err), http.StatusInternalServerError)
+			return
+		}
+
+		content, contentLength, err := s.executeDashboard(r.Context(), *base)
+		if err != nil {
+			Error(r.Context(), w, fmt.Sprintf("failed to render page: %s", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Content-Length", strconv.Itoa(contentLength))
+		if _, err = io.Copy(w, content); err != nil {
+			Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
+		}
+		return
+	}
+	config, err := s.getDashboardConfig(dashboard)
 	if err != nil {
-		Error(r.Context(), w, fmt.Sprintf("failed to get next page: %s", err), http.StatusInternalServerError)
+		Error(r.Context(), w, fmt.Sprintf("failed to get dashboard config: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	content, contentLength, err := s.renderDashboard(r.Context(), *base, RenderOptions{
-		Width:     base.Config.Width,
-		Height:    base.Config.Height,
-		PrintHTML: html,
-	})
+	content, contentLength, err := s.renderDashboard(r.Context(), dashboard, pageIndex, config.Width, config.Height)
 	if err != nil {
 		Error(r.Context(), w, fmt.Sprintf("failed to render page: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	if html {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	} else {
-		w.Header().Set("Content-Type", "image/png")
-	}
+	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Content-Length", strconv.Itoa(contentLength))
 	if _, err = io.Copy(w, content); err != nil {
 		Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
-		return
 	}
+}
+
+func (s *Server) getAsset(w http.ResponseWriter, r *http.Request) {
+	dashboard := r.PathValue("dashboard")
+	path := strings.TrimPrefix(r.URL.Path, "/dashboards/"+dashboard+"/assets")
+
+	slog.InfoContext(r.Context(), "getAssets", slog.String("dashboard", dashboard), slog.String("path", path))
+
+	http.ServeFile(w, r, filepath.Join(s.cfg.DashboardDir, dashboard, "assets", path))
 }
 
 func Error(ctx context.Context, w http.ResponseWriter, error string, code int) {
