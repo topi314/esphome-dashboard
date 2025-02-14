@@ -1,5 +1,4 @@
-<h1>Timeline</h1>
+<h1>Calendar Timeline</h1>
 <div class="container">
-    {{ $days := .HomeAssistant.Calendars.All2 }}
-    {{ template "timeline" $days }}
+    {{ template "timeline" .HomeAssistant.Calendars.Timeline }}
 </div>

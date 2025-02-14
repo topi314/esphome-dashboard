@@ -1,5 +1,5 @@
 {{ define "timeline" }}
-    <style>
+	<style>
         .timeline {
             display: grid;
             grid-template-columns: auto 1fr;
@@ -8,6 +8,10 @@
         .timeline > * {
             border-bottom: 2px solid black;
         }
+
+        .timeline > *:nth-last-child(-n+2) {
+			border-bottom: none;
+		}
 
         .timeline-day-date {
             padding: 10px;
@@ -20,40 +24,26 @@
             flex-direction: column;
             column-gap: 10px;
             padding: 10px;
-        }
-
-        .timeline-day-events-event {
             font-size: 24px;
         }
+	</style>
 
-        .timeline-day-events-event p {
-            margin: 0;
-        }
-    </style>
-
-    <div class="timeline">
+	<div class="timeline">
         {{ range $index, $day := . }}
-            {{ if eq $index 6 }}
-            {{ break }}
-            {{ end }}
             {{ if or (eq (len $day.Events) 0) $day.IsPast }}
                 {{ continue }}
             {{ end }}
-            <span class="timeline-day-date">{{ $day.Time | formatTimeToRelDay }}</span>
-            <div class="timeline-day-events">
+			<span class="timeline-day-date">{{ $day.Time | formatTimeToRelDay }}</span>
+			<div class="timeline-day-events">
                 {{ range $index, $event := $day.Events }}
-                    <div class="timeline-day-events-event">
-                        {{ if ne $event.Summary "" }}
-                            <p>{{ $event.Summary }}</p>
-                        {{ else  if ne $event.Description "" }}
-                            <p>{{ $event.Description }}</p>
+					<span class="timeline-day-events-event">
+						{{ if not $event.Start.IsFullDay }}
+                            {{ $event.Start.Time.Format "15:04" }}
                         {{ end }}
-                        {{ if ne $event.Location "" }}
-                            <p><strong>Location:</strong> {{ $event.Location }}</p>
-                        {{ end }}
-                    </div>
+                        {{ $event.Summary }}
+					</span>
                 {{ end }}
-            </div>
+			</div>
         {{ end }}
-    </div>
+	</div>
 {{ end }}

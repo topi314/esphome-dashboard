@@ -1,5 +1,4 @@
 <h1>Meal plan</h1>
 <div class="container">
-    {{ $days := .HomeAssistant.Calendars.Mealie }}
-    {{ template "timeline" $days }}
+    {{ template "timeline" .HomeAssistant.Calendars.Mealie }}
 </div>

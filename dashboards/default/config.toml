@@ -18,8 +18,8 @@ entities = [
 ]
 calendars = [
     { name = 'Mealie', ids = ['calendar.mealie_dinner', 'calendar.mealie_lunch'], days = 7 },
-    { name = 'All', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28 },
-    { name = 'All2', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28, max_events = 7 },
+    { name = 'Calendar', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28 },
+    { name = 'Timeline', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28, max_events = 10 },
 ]
 services = [
     { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' } },

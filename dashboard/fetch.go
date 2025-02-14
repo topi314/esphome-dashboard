@@ -130,7 +130,17 @@ func fillAndSortCalendarDays(calendar CalendarConfig, events []homeassistant.Cal
 	}
 
 	if calendar.MaxEvents > 0 {
-		// TODO: limit the number of total events
+		var totalEvents int
+		for i := range days {
+			if totalEvents > calendar.MaxEvents {
+				days[i].Events = nil
+				continue
+			}
+			totalEvents += len(days[i].Events)
+			if totalEvents > calendar.MaxEvents {
+				days[i].Events = days[i].Events[:1+len(days[i].Events)-(totalEvents-calendar.MaxEvents)]
+			}
+		}
 	}
 
 	return days
