@@ -11,6 +11,10 @@ A simple Go service to render a custom HTML/CSS dashboard as a PNG image from [H
 
 This service is intended to be used with [ESPHome](https://esphome.io/) devices that have a display and can show a PNG image.
 
+<img src=".github/images/device_1.jpg" width="200" alt="Dashboard in picture frame from IKEA from the front"> <img src=".github/images/device_2.jpg" width="200" alt="Dashboard in picture frame from IKEA from the side">
+
+<img src=".github/images/device_3.jpg" width="200" alt="Dashboard in picture frame from IKEA from the top"> <img src=".github/images/device_4.jpg" width="200" alt="Dashboard in picture frame from IKEA from the back">
+
 ## Table of Contents
 
 <details>
