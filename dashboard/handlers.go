@@ -90,7 +90,7 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Content-Length", strconv.Itoa(contentLength))
 		if _, err = io.Copy(w, content); err != nil {
-			Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
+			slog.ErrorContext(r.Context(), "failed to write response", slog.Any("err", err))
 		}
 		return
 	}
@@ -109,7 +109,7 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.Itoa(contentLength))
 	if _, err = io.Copy(w, content); err != nil {
-		Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)
+		slog.ErrorContext(r.Context(), "failed to write response", slog.Any("err", err))
 	}
 }
 
