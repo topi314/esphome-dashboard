@@ -7,6 +7,9 @@
 
 # ESPHome Dashboard
 
+> [!IMPORTANT]
+> If you are using an ESP32 without PSRAM this does not seem to work with esphome 2025.2.0+. I recommend using an older version of esphome until I find a solution.
+
 A simple Go service to render a custom HTML/CSS dashboard as a PNG image from [Home Assistant](https://www.home-assistant.io/) entities.
 
 This service is intended to be used with [ESPHome](https://esphome.io/) devices that have a display and can show a PNG image.
