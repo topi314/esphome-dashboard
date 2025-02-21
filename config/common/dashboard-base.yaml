@@ -206,6 +206,7 @@ http_request:
 online_image:
   - url: "${base_url}/dashboards/${dashboard_name}/pages/0"
     id: current_page
+    type: BINARY
     format: png
     on_download_finished:
       - then:
