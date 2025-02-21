@@ -25,6 +25,21 @@ type CalendarEvent struct {
 	Location    string `json:"location"`
 }
 
+func (e CalendarEvent) StartDay() time.Time {
+	year, month, day := e.Start.Time().Date()
+	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+}
+
+func (e CalendarEvent) EndDay() time.Time {
+	end := e.End.Time()
+	year, month, day := end.Date()
+	// if the event ends at 00:00 then it is still part of the previous day
+	if end.Hour() == 0 && end.Minute() == 0 && end.Second() == 0 {
+		return time.Date(year, month, day, 0, 0, 0, 0, time.UTC).AddDate(0, 0, -1)
+	}
+	return end
+}
+
 func (e CalendarEvent) IsFullDay(day time.Time) bool {
 	startTime := e.Start.Time()
 	endTime := e.End.Time()
@@ -56,11 +71,6 @@ func (d Date) Time() time.Time {
 		return date
 	}
 	return d.DateTime
-}
-
-func (d Date) Day() time.Time {
-	year, month, day := d.Time().Date()
-	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 }
 
 type Response struct {

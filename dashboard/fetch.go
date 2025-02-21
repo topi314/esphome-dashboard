@@ -89,8 +89,8 @@ func fillAndSortCalendarDays(calendar CalendarConfig, events []homeassistant.Cal
 	}
 
 	for _, event := range events {
-		startDay := event.Start.Day()
-		endDay := event.End.Day()
+		startDay := event.StartDay()
+		endDay := event.EndDay()
 
 		// find the index of the start day
 		firstDayIndex := slices.IndexFunc(days, func(cDay CalendarDay) bool {
@@ -109,7 +109,7 @@ func fillAndSortCalendarDays(calendar CalendarConfig, events []homeassistant.Cal
 
 		// add the event to all days between start and end
 		for i := firstDayIndex; i < len(days); i++ {
-			if days[i].Time.Equal(endDay) {
+			if days[i].Time.After(endDay) {
 				break
 			}
 			days[i].Events = append(days[i].Events, event)
