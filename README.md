@@ -437,9 +437,9 @@ GET /dashboards/{dashboard}/pages/{page}
 
 Query Parameters:
 
-| Name | Description                                                                                                                 |
-|------|-----------------------------------------------------------------------------------------------------------------------------|
-| html | Whether to return the page as HTML or PNG (`1`, `t`, `T`, `TRUE`, `true`, `True`, `0`, `f`, `F`, `FALSE`, `false`, `False`) |
+| Name   | Default | Description                                                 |
+|--------|---------|-------------------------------------------------------------|
+| format | `html`  | The format of the response (`html`, `png`, `jpeg` or `bmp`) |
 
 Response:
 
@@ -460,6 +460,7 @@ GET /version
 Response:
 
 * 200 OK:
+
 ```
 Dashboard v0.0.0-20250214131520-b8b38f8257cf+dirty (Go go1.24.0)
 ```

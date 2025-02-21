@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"image/jpeg"
 	"image/png"
 	"io"
 	"log/slog"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+	"golang.org/x/image/bmp"
 
 	"github.com/topi314/esphome-dashboard/dashboard/homeassistant"
 )
@@ -121,7 +123,7 @@ func (s *Server) executeDashboard(ctx context.Context, base Base) (io.Reader, in
 	return &buf, buf.Len(), nil
 }
 
-func (s *Server) renderDashboard(ctx context.Context, dashboard string, pageIndex int, width int, height int) (io.Reader, int, error) {
+func (s *Server) renderDashboard(ctx context.Context, dashboard string, pageIndex int, width int, height int, format string) (io.Reader, int, string, error) {
 	var cancel context.CancelFunc
 	ctx, cancel = chromedp.NewContext(ctx)
 	defer cancel()
@@ -140,22 +142,39 @@ func (s *Server) renderDashboard(ctx context.Context, dashboard string, pageInde
 			return err
 		}),
 	); err != nil {
-		return nil, 0, fmt.Errorf("failed to run chromedp: %w", err)
+		return nil, 0, "", fmt.Errorf("failed to run chromedp: %w", err)
 	}
 
-	return s.reencodePNG(bytes.NewReader(res))
+	return s.reencodeImage(bytes.NewReader(res), format)
 }
 
-func (s *Server) reencodePNG(r io.Reader) (io.Reader, int, error) {
+func (s *Server) reencodeImage(r io.Reader, format string) (io.Reader, int, string, error) {
 	decoded, err := png.Decode(r)
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to decode png: %w", err)
+		return nil, 0, "", fmt.Errorf("failed to decode png: %w", err)
 	}
 
 	encodedBuf := new(bytes.Buffer)
-	if err = s.encoder.Encode(encodedBuf, decoded); err != nil {
-		return nil, 0, fmt.Errorf("failed to encode png: %w", err)
+	var contentType string
+	switch format {
+	case "png":
+		if err = s.pngEncoder.Encode(encodedBuf, decoded); err != nil {
+			return nil, 0, "", fmt.Errorf("failed to encode png: %w", err)
+		}
+		contentType = "image/png"
+	case "jpeg":
+		if err = jpeg.Encode(encodedBuf, decoded, &jpeg.Options{Quality: 100}); err != nil {
+			return nil, 0, "", fmt.Errorf("failed to encode jpeg: %w", err)
+		}
+		contentType = "image/jpeg"
+	case "bmp":
+		if err = bmp.Encode(encodedBuf, decoded); err != nil {
+			return nil, 0, "", fmt.Errorf("failed to encode bmp: %w", err)
+		}
+		contentType = "image/bmp"
+	default:
+		return nil, 0, "", fmt.Errorf("unsupported format: %s", format)
 	}
 
-	return encodedBuf, encodedBuf.Len(), nil
+	return encodedBuf, encodedBuf.Len(), contentType, nil
 }

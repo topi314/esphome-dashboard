@@ -60,9 +60,9 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 	pageIndexStr := r.PathValue("page")
 
 	query := r.URL.Query()
-	htmlStr := query.Get("html")
+	format := query.Get("format")
 
-	slog.InfoContext(r.Context(), "getPage", slog.String("dashboard", dashboard), slog.String("page", pageIndexStr), slog.String("html", htmlStr))
+	slog.InfoContext(r.Context(), "getPage", slog.String("dashboard", dashboard), slog.String("page", pageIndexStr), slog.String("format", format))
 
 	pageIndex, err := strconv.Atoi(pageIndexStr)
 	if err != nil {
@@ -70,16 +70,11 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var html bool
-	if htmlStr != "" {
-		html, err = strconv.ParseBool(htmlStr)
-		if err != nil {
-			Error(r.Context(), w, "invalid html flag", http.StatusBadRequest)
-			return
-		}
+	if format == "" {
+		format = "html"
 	}
 
-	if html {
+	if format == "html" {
 		base, err := s.loadDashboard(dashboard, pageIndex)
 		if err != nil {
 			Error(r.Context(), w, fmt.Sprintf("failed to get next page: %s", err), http.StatusInternalServerError)
@@ -105,13 +100,13 @@ func (s *Server) getPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, contentLength, err := s.renderDashboard(r.Context(), dashboard, pageIndex, config.Width, config.Height)
+	content, contentLength, contentType, err := s.renderDashboard(r.Context(), dashboard, pageIndex, config.Width, config.Height, format)
 	if err != nil {
 		Error(r.Context(), w, fmt.Sprintf("failed to render page: %s", err), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.Itoa(contentLength))
 	if _, err = io.Copy(w, content); err != nil {
 		Error(r.Context(), w, "failed to write response", http.StatusInternalServerError)

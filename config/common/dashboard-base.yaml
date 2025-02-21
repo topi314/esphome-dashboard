@@ -91,7 +91,7 @@ sensor:
         - online_image.set_url:
             id: current_page
             url: !lambda |-
-              return ((std::string) "${base_url}/dashboards/${dashboard_name}/pages/" + std::to_string(static_cast<int>(id(current_page_index).state))).c_str();
+              return ((std::string) "${base_url}/dashboards/${dashboard_name}/pages/" + std::to_string(static_cast<int>(id(current_page_index).state)) + "?format=bmp").c_str();
         - component.update: current_page
 
 number:
@@ -204,10 +204,10 @@ http_request:
   verify_ssl: false
 
 online_image:
-  - url: "${base_url}/dashboards/${dashboard_name}/pages/0"
+  - url: "${base_url}/dashboards/${dashboard_name}/pages/0?format=bmp"
     id: current_page
     type: BINARY
-    format: png
+    format: BMP
     on_download_finished:
       - then:
           - component.update: eink_display

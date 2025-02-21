@@ -21,7 +21,7 @@ func New(cfg Config, version string, goVersion string, templates fs.FS) *Server 
 		version:   version,
 		goVersion: goVersion,
 		templates: templates,
-		encoder: &png.Encoder{
+		pngEncoder: &png.Encoder{
 			CompressionLevel: png.BestCompression,
 		},
 	}
@@ -44,7 +44,7 @@ type Server struct {
 	goVersion     string
 	templates     fs.FS
 	server        *http.Server
-	encoder       *png.Encoder
+	pngEncoder    *png.Encoder
 	homeAssistant *homeassistant.Client
 }
 
