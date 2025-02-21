@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"image"
+	"image/color"
 	"image/jpeg"
 	"image/png"
 	"io"
@@ -15,7 +17,7 @@ import (
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
-	"golang.org/x/image/bmp"
+	"github.com/sergeymakinen/go-bmp"
 
 	"github.com/topi314/esphome-dashboard/dashboard/homeassistant"
 )
@@ -154,21 +156,33 @@ func (s *Server) reencodeImage(r io.Reader, format string) (io.Reader, int, stri
 		return nil, 0, "", fmt.Errorf("failed to decode png: %w", err)
 	}
 
+	decoded.ColorModel().Convert(decoded.At(0, 0))
+
+	paletted := image.NewPaletted(decoded.Bounds(), []color.Color{
+		color.RGBA{R: 0, G: 0, B: 0, A: 255},
+		color.RGBA{R: 255, G: 255, B: 255, A: 255},
+	})
+	for y := decoded.Bounds().Min.Y; y < decoded.Bounds().Max.Y; y++ {
+		for x := decoded.Bounds().Min.X; x < decoded.Bounds().Max.X; x++ {
+			paletted.Set(x, y, decoded.At(x, y))
+		}
+	}
+
 	encodedBuf := new(bytes.Buffer)
 	var contentType string
 	switch format {
 	case "png":
-		if err = s.pngEncoder.Encode(encodedBuf, decoded); err != nil {
+		if err = s.pngEncoder.Encode(encodedBuf, paletted); err != nil {
 			return nil, 0, "", fmt.Errorf("failed to encode png: %w", err)
 		}
 		contentType = "image/png"
 	case "jpeg":
-		if err = jpeg.Encode(encodedBuf, decoded, &jpeg.Options{Quality: 100}); err != nil {
+		if err = jpeg.Encode(encodedBuf, paletted, &jpeg.Options{Quality: 100}); err != nil {
 			return nil, 0, "", fmt.Errorf("failed to encode jpeg: %w", err)
 		}
 		contentType = "image/jpeg"
 	case "bmp":
-		if err = bmp.Encode(encodedBuf, decoded); err != nil {
+		if err = bmp.Encode(encodedBuf, paletted); err != nil {
 			return nil, 0, "", fmt.Errorf("failed to encode bmp: %w", err)
 		}
 		contentType = "image/bmp"
