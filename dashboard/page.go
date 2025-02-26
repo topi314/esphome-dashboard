@@ -29,16 +29,18 @@ type EntityConfig struct {
 }
 
 type CalendarConfig struct {
-	Name           string   `toml:"name"`
-	IDs            []string `toml:"ids"`
-	Days           int      `toml:"days"`
-	MaxEvents      int      `toml:"max_events"`
-	SkipPastEvents bool     `toml:"skip_past_events"`
+	Name            string   `toml:"name"`
+	IDs             []string `toml:"ids"`
+	Days            int      `toml:"days"`
+	MaxEvents       int      `toml:"max_events"`
+	SkipPastEvents  bool     `toml:"skip_past_events"`
+	SummaryPrefixes []string `toml:"summary_prefixes"`
 }
 
 type ServiceConfig struct {
 	Name           string         `toml:"name"`
 	Domain         string         `toml:"domain"`
+	DomainOptions  map[string]any `toml:"domain_options"`
 	Service        string         `toml:"service"`
 	ReturnResponse bool           `toml:"return_response"`
 	Data           map[string]any `toml:"data"`

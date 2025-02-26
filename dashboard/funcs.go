@@ -17,6 +17,52 @@ func seq(n int) []int {
 	return s
 }
 
+func hasIndex(l any, i any) (bool, error) {
+	v, isNil := indirect(reflect.ValueOf(l))
+	if isNil {
+		return false, nil
+	}
+
+	switch v.Kind() {
+	case reflect.Array, reflect.Slice:
+		ii, err := toInt(i)
+		if err != nil {
+			return false, err
+		}
+		return ii >= 0 && ii < v.Len(), nil
+	case reflect.Map:
+		return v.MapIndex(reflect.ValueOf(i)).IsValid(), nil
+	default:
+		return false, errors.New("can't check index of " + reflect.ValueOf(l).Type().String())
+	}
+}
+
+func toInt(a any) (int, error) {
+	switch v := a.(type) {
+	case int:
+		return v, nil
+	case int8:
+		return int(v), nil
+	case int16:
+		return int(v), nil
+	case int32:
+		return int(v), nil
+	case int64:
+		return int(v), nil
+	case uint:
+		return int(v), nil
+	case uint8:
+		return int(v), nil
+	case uint16:
+		return int(v), nil
+	case uint32:
+		return int(v), nil
+	case uint64:
+		return int(v), nil
+	}
+	return 0, errors.New("can't convert to int")
+}
+
 func reverse(l any) (any, error) {
 	if l == nil {
 		return nil, errors.New("sequence must be provided")
@@ -45,6 +91,10 @@ func reverse(l any) (any, error) {
 
 func parseTime(s string) (time.Time, error) {
 	return time.Parse(time.RFC3339, s)
+}
+
+func formatTimeToHour(t time.Time) string {
+	return t.Format("15:04")
 }
 
 func formatTimeToDay(t time.Time) string {

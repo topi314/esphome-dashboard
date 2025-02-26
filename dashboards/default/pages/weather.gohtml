@@ -1,0 +1,7 @@
+<h1>Weather</h1>
+<div class="container">
+    {{ $now := index .HomeAssistant.Entities.Forecast }}
+    {{ $hourlyForecast := index .HomeAssistant.Services.HourlyWeatherForecasts.ServiceResponse "weather.forecast_home" }}
+    {{ $dailyForecast := index .HomeAssistant.Services.DailyWeatherForecasts.ServiceResponse "weather.forecast_home" }}
+    {{ template "forecast" dict "Unit" "°C" "Now" $now "Hourly" $hourlyForecast "Daily" $dailyForecast }}
+</div>

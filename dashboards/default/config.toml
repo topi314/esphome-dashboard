@@ -2,7 +2,7 @@ width = 800
 height = 480
 base = 'base.gohtml'
 pages = [
-    'pages/forecast.gohtml',
+    'pages/weather.gohtml',
     'pages/mealplan.gohtml',
     'pages/calendar.gohtml',
     'pages/timeline.gohtml',
@@ -14,11 +14,12 @@ entities = [
     { name = 'Forecast', id = 'weather.forecast_home' },
 ]
 calendars = [
-    { name = 'Mealie', ids = ['calendar.mealie_dinner', 'calendar.mealie_lunch'], days = 7, skip_past_events = true },
+    { name = 'Mealie', ids = ['calendar.mealie_lunch', 'calendar.mealie_dinner'], days = 7, skip_past_events = true, summary_prefixes = ['Lunch: ', 'Dinner: '] },
     { name = 'Calendar', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28 },
     { name = 'Timeline', ids = ['calendar.konzerte', 'calendar.urlaub', 'calendar.feiertage'], days = 28, max_events = 10, skip_past_events = true },
     { name = 'PokemonGo', ids = ['calendar.pokemon_go_local_events'], days = 28, max_events = 10, skip_past_events = true },
 ]
 services = [
-    { name = 'WeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' } },
+    { name = 'HourlyWeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'hourly' }, domain_options = { max = 8, skip_past = true } },
+    { name = 'DailyWeatherForecasts', domain = 'weather', service = 'get_forecasts', return_response = true, data = { entity_id = 'weather.forecast_home', type = 'daily' }, domain_options = { } },
 ]

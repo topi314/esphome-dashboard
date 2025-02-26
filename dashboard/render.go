@@ -55,6 +55,7 @@ type CalendarDay struct {
 func (s *Server) templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"seq":                 seq,
+		"hasIndex":            hasIndex,
 		"now":                 time.Now,
 		"dict":                dict,
 		"reverse":             reverse,
@@ -67,6 +68,7 @@ func (s *Server) templateFuncs() template.FuncMap {
 		"safeJS":              safeJS,
 		"safeJSStr":           safeJSStr,
 		"safeSrcset":          safeSrcset,
+		"formatTimeToHour":    formatTimeToHour,
 		"formatTimeToDay":     formatTimeToDay,
 		"formatTimeToRelDay":  formatTimeToRelDay,
 	}

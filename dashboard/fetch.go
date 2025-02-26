@@ -56,11 +56,16 @@ func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []Ca
 		end := start.AddDate(0, 0, calendar.Days)
 
 		var allEvents []homeassistant.CalendarEvent
-		for _, id := range calendar.IDs {
+		for i, id := range calendar.IDs {
 			events, err := s.homeAssistant.GetCalendar(ctx, id, start, end)
 			if err != nil {
 				slog.ErrorContext(ctx, "failed to get calendar", slog.String("calendar", calendar.Name), slog.String("entity_id", id), slog.Any("err", err))
 				continue
+			}
+			if len(calendar.SummaryPrefixes) > i {
+				for ei := range events {
+					events[ei].Summary = calendar.SummaryPrefixes[i] + events[ei].Summary
+				}
 			}
 			allEvents = append(allEvents, events...)
 		}
@@ -89,6 +94,7 @@ func fillAndSortCalendarDays(calendar CalendarConfig, events []homeassistant.Cal
 	}
 
 	for _, event := range events {
+
 		startDay := event.StartDay()
 		endDay := event.EndDay()
 
@@ -188,8 +194,78 @@ func (s *Server) fetchHomeAssistantServices(ctx context.Context, services []Serv
 			slog.ErrorContext(ctx, "failed to call service", slog.String("domain", service.Domain), slog.String("service", service.Service), slog.Any("err", err))
 			continue
 		}
-		responses[service.Name] = response
+		responses[service.Name] = s.processServiceResponse(service, response)
 	}
 
 	return responses, nil
+}
+
+// processServiceResponse is used to transform the response of a service call before it is rendered.
+func (s *Server) processServiceResponse(service ServiceConfig, response homeassistant.Response) homeassistant.Response {
+	switch service.Domain {
+	case "weather":
+		switch service.Service {
+		case "get_forecasts":
+			if domainOptionMax, ok := service.DomainOptions["max"]; ok {
+				if maxInt, ok := domainOptionMax.(int64); ok && maxInt > 0 {
+					// transform the response to only include the next x forecasts
+					for k := range response.ServiceResponse {
+						forecasts, ok := response.ServiceResponse[k].(map[string]any)
+						if !ok {
+							continue
+						}
+
+						forecast, ok := forecasts["forecast"].([]any)
+						if !ok {
+							continue
+						}
+
+						if len(forecast) > int(maxInt) {
+							forecasts["forecast"] = forecast[:maxInt]
+						}
+					}
+				}
+			}
+			if domainOptionSkipPast, ok := service.DomainOptions["skip_past"]; ok {
+				skipPast, ok := domainOptionSkipPast.(bool)
+				if ok && skipPast {
+					now := time.Now()
+					// transform the response to only include future forecasts
+					for k := range response.ServiceResponse {
+						forecasts, ok := response.ServiceResponse[k].(map[string]any)
+						if !ok {
+							continue
+						}
+
+						forecast, ok := forecasts["forecast"].([]any)
+						if !ok {
+							continue
+						}
+
+						for i := range forecast {
+							forecastTime, ok := forecast[i].(map[string]any)["datetime"].(string)
+							if !ok {
+								continue
+							}
+
+							forecastTimeParsed, err := time.Parse(time.RFC3339, forecastTime)
+							if err != nil {
+								continue
+							}
+
+							if forecastTimeParsed.After(now) {
+								forecast = forecast[i:]
+								break
+							}
+						}
+
+						forecasts["forecast"] = forecast
+					}
+				}
+			}
+		}
+	}
+
+	return response
+
 }
