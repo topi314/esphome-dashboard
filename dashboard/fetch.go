@@ -49,7 +49,7 @@ func (s *Server) fetchHomeAssistantEntities(ctx context.Context, entities []Enti
 func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []CalendarConfig) (map[string][]CalendarDay, error) {
 	year, month, day := time.Now().Date()
 	start := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
-	start = start.AddDate(0, 0, -weekdayToIndex(start.Weekday())) // move start at the beginning of the week
+	weekStart := start.AddDate(0, 0, -weekdayToIndex(start.Weekday())) // move start at the beginning of the week
 
 	days := make(map[string][]CalendarDay)
 	for _, calendar := range calendars {
@@ -57,7 +57,7 @@ func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []Ca
 
 		var allEvents []homeassistant.CalendarEvent
 		for i, id := range calendar.IDs {
-			events, err := s.homeAssistant.GetCalendar(ctx, id, start, end)
+			events, err := s.homeAssistant.GetCalendar(ctx, id, weekStart, end)
 			if err != nil {
 				slog.ErrorContext(ctx, "failed to get calendar", slog.String("calendar", calendar.Name), slog.String("entity_id", id), slog.Any("err", err))
 				continue
@@ -70,7 +70,7 @@ func (s *Server) fetchHomeAssistantCalendars(ctx context.Context, calendars []Ca
 			allEvents = append(allEvents, events...)
 		}
 
-		days[calendar.Name] = fillAndSortCalendarDays(calendar, allEvents, start)
+		days[calendar.Name] = fillAndSortCalendarDays(calendar, allEvents, weekStart)
 	}
 
 	return days, nil
